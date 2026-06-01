@@ -10,6 +10,7 @@
 const express = require('express');
 const fs = require('fs');
 const path = require('path');
+const os = require('os');
 
 require('dotenv').config(); // 自动读取项目根目录 .env（密钥等配置）
 
@@ -29,6 +30,9 @@ const AI_TEMP  = process.env.AI_TEMPERATURE != null ? Number(process.env.AI_TEMP
 /* ---- 可选：管理员令牌，设置后更新云端台账需携带 X-Admin-Token ---- */
 const ADMIN_TOKEN = process.env.ADMIN_TOKEN || '';
 
+/* ---- 可选：整站访问口令，设置后所有访问需通过浏览器口令验证（公网部署强烈建议）---- */
+const SITE_PASSWORD = process.env.SITE_PASSWORD || '';
+
 if (!fs.existsSync(DATA_DIR)) fs.mkdirSync(DATA_DIR, { recursive: true });
 
 /* ---- 宽松 CORS（内部工具，方便前端从 file:// 或其它主机调用）---- */
@@ -38,6 +42,20 @@ app.use((req, res, next) => {
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type, X-Admin-Token');
   if (req.method === 'OPTIONS') return res.sendStatus(204);
   next();
+});
+
+/* ---- 可选：整站访问口令（HTTP Basic Auth）。设置 SITE_PASSWORD 后，公网访问需先输入口令 ----
+   作用：① 防止陌生人调用 AI 接口、消耗你的 Key 额度；② 保护内部台账数据。
+   浏览器会弹出登录框：用户名随意，密码填 SITE_PASSWORD。留空则不启用（适合纯内网）。 */
+app.use((req, res, next) => {
+  if (!SITE_PASSWORD) return next();
+  const m = /^Basic (.+)$/.exec(req.get('Authorization') || '');
+  if (m) {
+    const pass = Buffer.from(m[1], 'base64').toString().split(':')[1] || '';
+    if (pass === SITE_PASSWORD) return next();
+  }
+  res.setHeader('WWW-Authenticate', 'Basic realm="Concrete Mix Tool"');
+  return res.status(401).send('需要访问口令');
 });
 
 /* ====================================================================
@@ -193,9 +211,24 @@ app.post('/api/ai/analyze', express.json({ limit: '4mb' }), async (req, res) => 
    ==================================================================== */
 app.use(express.static(path.join(__dirname, 'public')));
 
+/* 列出本机所有局域网 IPv4 地址，便于把"给同事访问的地址"直接打印出来 */
+function lanAddresses() {
+  const out = [];
+  const ifaces = os.networkInterfaces();
+  for (const name of Object.keys(ifaces)) {
+    for (const ni of ifaces[name] || []) {
+      if (ni.family === 'IPv4' && !ni.internal) out.push(ni.address);
+    }
+  }
+  return out;
+}
+
 app.listen(PORT, () => {
   console.log('混凝土配合比智能推荐工具 · 联网版');
   console.log('  本地访问:  http://localhost:' + PORT);
+  for (const ip of lanAddresses()) {
+    console.log('  局域网访问: http://' + ip + ':' + PORT + '   ← 同一网络内同事用这个');
+  }
   console.log('  中心台账:  ' + (fs.existsSync(LEDGER_PATH) ? '已就绪' : '未上传（首次需管理员上传）'));
   console.log('  AI 引擎:   ' + (AI_KEY ? (AI_MODEL + ' @ ' + AI_BASE) : '未配置（设置 AI_API_KEY 后启用）'));
 });
