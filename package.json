@@ -1,0 +1,16 @@
+{
+  "name": "concrete-mix-online",
+  "version": "1.0.0",
+  "description": "混凝土配合比智能推荐工具 · 联网版（云端中心台账 + AI 智能研判）",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js",
+    "dev": "node --watch server.js"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "dependencies": {
+    "express": "^4.22.2"
+  }
+}
