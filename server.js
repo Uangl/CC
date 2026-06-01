@@ -11,6 +11,8 @@ const express = require('express');
 const fs = require('fs');
 const path = require('path');
 
+require('dotenv').config(); // 自动读取项目根目录 .env（密钥等配置）
+
 const app = express();
 const PORT = process.env.PORT || 3000;
 
