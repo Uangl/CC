@@ -11,3 +11,9 @@ web-build/
 .env
 .DS_Store
 npm-debug.log*
+server/node_modules/
+server/.env
+server/cuoti.db
+server/cuoti.db-shm
+server/cuoti.db-wal
+server/uploads/

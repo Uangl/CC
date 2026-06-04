@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import {
   View,
   Text,
@@ -7,118 +7,136 @@ import {
   TouchableOpacity,
   Alert,
   SafeAreaView,
+  TextInput,
 } from 'react-native';
 import AsyncStorage from '@react-native-async-storage/async-storage';
+import { Palette, Radius, Spacing, Shadow, Typo } from '../constants/theme';
 import { useMistakeStore } from '../store/mistakeStore';
-import { Colors } from '../constants/colors';
-import { Features } from '../services';
+import { useAuthStore } from '../store/authStore';
+import { backendEnabled } from '../services';
+import { getApiUrl, setApiUrl } from '../services/api/client';
 
 export function SettingsScreen() {
-  const initialize = useMistakeStore((s) => s.initialize);
+  const { user, logout } = useAuthStore();
+  const initMistakes = useMistakeStore((s) => s.initialize);
+  const [serverUrl, setServerUrl] = useState(getApiUrl());
+  const [editingUrl, setEditingUrl] = useState(false);
+
+  const handleLogout = () => {
+    Alert.alert('退出登录', '确定要退出吗？', [
+      { text: '取消', style: 'cancel' },
+      { text: '退出', style: 'destructive', onPress: () => logout() },
+    ]);
+  };
 
   const handleClearData = () => {
-    Alert.alert('清除数据', '确定要清除所有错题数据吗？此操作不可恢复。', [
+    Alert.alert('清除数据', '确定要清除所有本地数据吗？', [
       { text: '取消', style: 'cancel' },
       {
         text: '清除',
         style: 'destructive',
         onPress: async () => {
           await AsyncStorage.removeItem('cuoti_mistakes');
-          await initialize();
-          Alert.alert('已重置', '数据已恢复为示例数据');
+          await initMistakes();
+          Alert.alert('已重置');
         },
       },
     ]);
   };
 
+  const handleSaveUrl = async () => {
+    await setApiUrl(serverUrl.trim());
+    setEditingUrl(false);
+    Alert.alert('已保存', '重启 App 生效');
+  };
+
   return (
-    <SafeAreaView style={styles.safeArea}>
-      <ScrollView style={styles.container}>
-        <Text style={styles.title}>我的</Text>
+    <SafeAreaView style={styles.safe}>
+      <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
+        <Text style={Typo.h2}>我的</Text>
+
+        {user && (
+          <View style={styles.profileCard}>
+            <View style={styles.avatar}>
+              <Text style={styles.avatarText}>{user.nickname?.[0] || '?'}</Text>
+            </View>
+            <View style={styles.profileInfo}>
+              <Text style={styles.profileName}>{user.nickname}</Text>
+              <Text style={styles.profileMeta}>
+                {user.phone} · {user.grade}年级 · {user.role === 'admin' ? '管理员' : '学生'}
+              </Text>
+            </View>
+          </View>
+        )}
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>关于</Text>
-          <View style={styles.infoCard}>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>应用名称</Text>
-              <Text style={styles.infoValue}>错题小老师</Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>版本</Text>
-              <Text style={styles.infoValue}>1.0.0 MVP</Text>
-            </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>定位</Text>
-              <Text style={styles.infoValue}>小学数学AI错题补弱</Text>
-            </View>
+          <Text style={styles.sectionTitle}>服务状态</Text>
+          <View style={styles.card}>
+            <Row label="后端连接" value={backendEnabled ? '已连接' : '离线模式'}
+              valueColor={backendEnabled ? Palette.success : Palette.textMuted} />
+            <Row label="AI 服务（DeepSeek）" value={backendEnabled ? '服务端代理' : '本地模拟'}
+              valueColor={backendEnabled ? Palette.success : Palette.textMuted} />
           </View>
         </View>
 
         <View style={styles.section}>
-          <Text style={styles.sectionTitle}>智能服务</Text>
-          <View style={styles.infoCard}>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>AI讲题 / 变式题（智谱）</Text>
-              <Text
-                style={[
-                  styles.infoValue,
-                  { color: Features.aiEnabled ? Colors.green : Colors.textLight },
-                ]}
-              >
-                {Features.aiEnabled ? '已启用' : '未配置'}
-              </Text>
+          <Text style={styles.sectionTitle}>服务器地址</Text>
+          {editingUrl ? (
+            <View style={styles.urlEditRow}>
+              <TextInput
+                style={styles.urlInput}
+                value={serverUrl}
+                onChangeText={setServerUrl}
+                autoCapitalize="none"
+                placeholder="http://192.168.x.x:3000"
+                placeholderTextColor={Palette.textMuted}
+              />
+              <TouchableOpacity style={styles.urlSaveBtn} onPress={handleSaveUrl}>
+                <Text style={styles.urlSaveBtnText}>保存</Text>
+              </TouchableOpacity>
             </View>
-            <View style={styles.infoRow}>
-              <Text style={styles.infoLabel}>拍题识别（百度OCR）</Text>
-              <Text
-                style={[
-                  styles.infoValue,
-                  { color: Features.ocrEnabled ? Colors.green : Colors.textLight },
-                ]}
-              >
-                {Features.ocrEnabled ? '已启用' : '未配置'}
-              </Text>
-            </View>
-          </View>
-          {(!Features.aiEnabled || !Features.ocrEnabled) && (
-            <Text style={styles.hintNote}>
-              未配置时自动使用本地模拟，功能可正常体验。在 .env 中填入 key
-              并重启（npx expo start -c）即可启用真实服务。
-            </Text>
+          ) : (
+            <TouchableOpacity style={styles.card} onPress={() => setEditingUrl(true)}>
+              <Text style={Typo.caption}>{serverUrl || '未配置'}</Text>
+              <Text style={styles.editHint}>点击修改</Text>
+            </TouchableOpacity>
           )}
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>学习理念</Text>
-          <View style={styles.conceptCard}>
-            <Text style={styles.conceptText}>
+          <View style={styles.ideaCard}>
+            <Text style={styles.ideaText}>
               不是把错题存起来，而是把错题讲明白、练透、清掉。
             </Text>
           </View>
-          <View style={styles.conceptCard}>
-            <Text style={styles.conceptText}>
-              每天只讲 1 道代表性错题，不要一次刷太多。少量高质量复习，效果最好。
+          <View style={styles.ideaCard}>
+            <Text style={styles.ideaText}>
+              每天只讲 1 道代表性错题，少量高质量复习，效果最好。
             </Text>
           </View>
-        </View>
-
-        <View style={styles.section}>
-          <Text style={styles.sectionTitle}>数据管理</Text>
-          <TouchableOpacity style={styles.dangerBtn} onPress={handleClearData}>
-            <Text style={styles.dangerBtnText}>重置为示例数据</Text>
-          </TouchableOpacity>
         </View>
 
         <View style={styles.section}>
           <Text style={styles.sectionTitle}>隐私说明</Text>
-          <View style={styles.privacyCard}>
-            <Text style={styles.privacyText}>
-              • 所有数据仅保存在本地设备{'\n'}
+          <View style={styles.card}>
+            <Text style={Typo.caption}>
               • 不收集真实姓名、学校等信息{'\n'}
               • 不含社交、排名功能{'\n'}
               • 专注学习，保护未成年人隐私
             </Text>
           </View>
+        </View>
+
+        <View style={styles.actions}>
+          <TouchableOpacity style={styles.dangerBtn} onPress={handleClearData}>
+            <Text style={styles.dangerBtnText}>重置本地数据</Text>
+          </TouchableOpacity>
+          {user && (
+            <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
+              <Text style={styles.logoutBtnText}>退出登录</Text>
+            </TouchableOpacity>
+          )}
         </View>
 
         <View style={{ height: 40 }} />
@@ -127,87 +145,103 @@ export function SettingsScreen() {
   );
 }
 
-const styles = StyleSheet.create({
-  safeArea: {
-    flex: 1,
-    backgroundColor: Colors.background,
-  },
-  container: {
-    flex: 1,
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: Colors.text,
-    marginBottom: 24,
-  },
-  section: {
-    marginBottom: 24,
-  },
-  sectionTitle: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: Colors.textSecondary,
-    marginBottom: 10,
-  },
-  infoCard: {
-    backgroundColor: Colors.surface,
-    borderRadius: 12,
-    padding: 4,
-  },
-  infoRow: {
+function Row({ label, value, valueColor }: { label: string; value: string; valueColor?: string }) {
+  return (
+    <View style={rowStyles.row}>
+      <Text style={Typo.body}>{label}</Text>
+      <Text style={[Typo.caption, { fontWeight: '600', color: valueColor || Palette.textSecondary }]}>
+        {value}
+      </Text>
+    </View>
+  );
+}
+
+const rowStyles = StyleSheet.create({
+  row: {
     flexDirection: 'row',
     justifyContent: 'space-between',
-    padding: 14,
+    alignItems: 'center',
+    paddingVertical: Spacing.md,
     borderBottomWidth: 1,
-    borderBottomColor: Colors.divider,
+    borderBottomColor: Palette.divider,
   },
-  infoLabel: {
+});
+
+const styles = StyleSheet.create({
+  safe: { flex: 1, backgroundColor: Palette.bg },
+  container: { flex: 1, padding: Spacing.xl },
+  profileCard: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    backgroundColor: Palette.surface,
+    borderRadius: Radius.lg,
+    padding: Spacing.lg,
+    marginTop: Spacing.lg,
+    marginBottom: Spacing.xl,
+    ...Shadow,
+  },
+  avatar: {
+    width: 52,
+    height: 52,
+    borderRadius: 26,
+    backgroundColor: Palette.primaryBg,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: Spacing.lg,
+  },
+  avatarText: { color: Palette.primary, fontSize: 22, fontWeight: '700' },
+  profileInfo: { flex: 1 },
+  profileName: { ...Typo.h3, marginBottom: 2 },
+  profileMeta: { ...Typo.caption },
+  section: { marginBottom: Spacing.xl },
+  sectionTitle: { ...Typo.label, color: Palette.textSecondary, marginBottom: Spacing.sm },
+  card: {
+    backgroundColor: Palette.surface,
+    borderRadius: Radius.md,
+    padding: Spacing.lg,
+    ...Shadow,
+  },
+  urlEditRow: { flexDirection: 'row', gap: 8 },
+  urlInput: {
+    flex: 1,
+    backgroundColor: Palette.surface,
+    borderRadius: Radius.sm,
+    padding: 12,
     fontSize: 14,
-    color: Colors.text,
+    color: Palette.text,
+    borderWidth: 1,
+    borderColor: Palette.border,
   },
-  infoValue: {
-    fontSize: 14,
-    color: Colors.textSecondary,
+  urlSaveBtn: {
+    backgroundColor: Palette.primary,
+    borderRadius: Radius.sm,
+    paddingHorizontal: 18,
+    justifyContent: 'center',
   },
-  hintNote: {
-    fontSize: 12,
-    color: Colors.textSecondary,
-    lineHeight: 18,
-    marginTop: 8,
-    paddingHorizontal: 4,
+  urlSaveBtnText: { color: Palette.textInverse, fontWeight: '600', fontSize: 14 },
+  editHint: { ...Typo.small, color: Palette.primary, marginTop: 4 },
+  ideaCard: {
+    backgroundColor: Palette.primaryBg,
+    borderRadius: Radius.md,
+    padding: Spacing.lg,
+    marginBottom: Spacing.sm,
   },
-  conceptCard: {
-    backgroundColor: Colors.primary + '08',
-    borderRadius: 10,
-    padding: 14,
-    marginBottom: 8,
-  },
-  conceptText: {
-    fontSize: 14,
-    color: Colors.text,
-    lineHeight: 22,
-  },
+  ideaText: { ...Typo.body, color: Palette.primaryDark, lineHeight: 22 },
+  actions: { gap: 10, marginTop: Spacing.lg },
   dangerBtn: {
-    backgroundColor: Colors.error + '10',
-    borderRadius: 12,
+    backgroundColor: Palette.errorBg,
+    borderRadius: Radius.sm,
     padding: 16,
     alignItems: 'center',
   },
-  dangerBtnText: {
-    color: Colors.error,
-    fontSize: 15,
-    fontWeight: '600',
-  },
-  privacyCard: {
-    backgroundColor: Colors.surface,
-    borderRadius: 12,
+  dangerBtnText: { color: Palette.error, fontWeight: '600', fontSize: 15 },
+  logoutBtn: {
+    backgroundColor: Palette.surface,
+    borderRadius: Radius.sm,
     padding: 16,
+    alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Palette.border,
   },
-  privacyText: {
-    fontSize: 13,
-    color: Colors.textSecondary,
-    lineHeight: 22,
-  },
+  logoutBtnText: { color: Palette.textSecondary, fontWeight: '600', fontSize: 15 },
 });

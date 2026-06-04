@@ -17,7 +17,7 @@ import { MISTAKE_REASONS } from '../constants/mistakeReasons';
 import { GRADE_LABELS } from '../constants/mistakeReasons';
 import { useMistakeStore } from '../store/mistakeStore';
 import { Grade, MistakeReasonType, KnowledgePoint } from '../models/types';
-import { getOcrService, Features } from '../services';
+import { backendEnabled } from '../services';
 
 export function CreateMistakeScreen({ route, navigation }: { route: any; navigation: any }) {
   const imageUri = route.params?.imageUri as string | undefined;
@@ -34,24 +34,11 @@ export function CreateMistakeScreen({ route, navigation }: { route: any; navigat
 
   const gradeKps = getKnowledgePointsByGrade(grade);
 
-  // 有图片且配置了 OCR 时，自动识别题干并预填
+  // 有图片且连接后端时，尝试 OCR 识别（后端代理百度 OCR）
   useEffect(() => {
-    if (!imageUri || !Features.ocrEnabled) return;
-    let active = true;
-    setOcrLoading(true);
-    getOcrService()
-      .recognizeImage(imageUri)
-      .then((result) => {
-        if (active && result.questionText) {
-          setQuestionText((prev) => prev || result.questionText);
-        }
-      })
-      .finally(() => {
-        if (active) setOcrLoading(false);
-      });
-    return () => {
-      active = false;
-    };
+    if (!imageUri || !backendEnabled) return;
+    // OCR 在后端通过文件上传实现，移动端需要另外处理 multipart/form-data
+    // 当前先跳过自动识别，用户手动输入题干
   }, [imageUri]);
 
   const handleSave = () => {
