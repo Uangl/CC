@@ -11,6 +11,7 @@ import {
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import { useMistakeStore } from '../store/mistakeStore';
 import { Colors } from '../constants/colors';
+import { Features } from '../services';
 
 export function SettingsScreen() {
   const initialize = useMistakeStore((s) => s.initialize);
@@ -51,6 +52,40 @@ export function SettingsScreen() {
               <Text style={styles.infoValue}>小学数学AI错题补弱</Text>
             </View>
           </View>
+        </View>
+
+        <View style={styles.section}>
+          <Text style={styles.sectionTitle}>智能服务</Text>
+          <View style={styles.infoCard}>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>AI讲题 / 变式题（智谱）</Text>
+              <Text
+                style={[
+                  styles.infoValue,
+                  { color: Features.aiEnabled ? Colors.green : Colors.textLight },
+                ]}
+              >
+                {Features.aiEnabled ? '已启用' : '未配置'}
+              </Text>
+            </View>
+            <View style={styles.infoRow}>
+              <Text style={styles.infoLabel}>拍题识别（百度OCR）</Text>
+              <Text
+                style={[
+                  styles.infoValue,
+                  { color: Features.ocrEnabled ? Colors.green : Colors.textLight },
+                ]}
+              >
+                {Features.ocrEnabled ? '已启用' : '未配置'}
+              </Text>
+            </View>
+          </View>
+          {(!Features.aiEnabled || !Features.ocrEnabled) && (
+            <Text style={styles.hintNote}>
+              未配置时自动使用本地模拟，功能可正常体验。在 .env 中填入 key
+              并重启（npx expo start -c）即可启用真实服务。
+            </Text>
+          )}
         </View>
 
         <View style={styles.section}>
@@ -135,6 +170,13 @@ const styles = StyleSheet.create({
   infoValue: {
     fontSize: 14,
     color: Colors.textSecondary,
+  },
+  hintNote: {
+    fontSize: 12,
+    color: Colors.textSecondary,
+    lineHeight: 18,
+    marginTop: 8,
+    paddingHorizontal: 4,
   },
   conceptCard: {
     backgroundColor: Colors.primary + '08',

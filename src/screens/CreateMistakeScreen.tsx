@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   View,
   Text,
@@ -9,13 +9,15 @@ import {
   Image,
   Alert,
   SafeAreaView,
+  ActivityIndicator,
 } from 'react-native';
 import { Colors } from '../constants/colors';
-import { KNOWLEDGE_POINTS, getKnowledgePointsByGrade } from '../data/knowledgePoints';
+import { getKnowledgePointsByGrade } from '../data/knowledgePoints';
 import { MISTAKE_REASONS } from '../constants/mistakeReasons';
 import { GRADE_LABELS } from '../constants/mistakeReasons';
 import { useMistakeStore } from '../store/mistakeStore';
 import { Grade, MistakeReasonType, KnowledgePoint } from '../models/types';
+import { getOcrService, Features } from '../services';
 
 export function CreateMistakeScreen({ route, navigation }: { route: any; navigation: any }) {
   const imageUri = route.params?.imageUri as string | undefined;
@@ -28,8 +30,29 @@ export function CreateMistakeScreen({ route, navigation }: { route: any; navigat
   const [selectedKp, setSelectedKp] = useState<KnowledgePoint | null>(null);
   const [selectedReason, setSelectedReason] = useState<MistakeReasonType | null>(null);
   const [showReasonFollowUp, setShowReasonFollowUp] = useState(false);
+  const [ocrLoading, setOcrLoading] = useState(false);
 
   const gradeKps = getKnowledgePointsByGrade(grade);
+
+  // 有图片且配置了 OCR 时，自动识别题干并预填
+  useEffect(() => {
+    if (!imageUri || !Features.ocrEnabled) return;
+    let active = true;
+    setOcrLoading(true);
+    getOcrService()
+      .recognizeImage(imageUri)
+      .then((result) => {
+        if (active && result.questionText) {
+          setQuestionText((prev) => prev || result.questionText);
+        }
+      })
+      .finally(() => {
+        if (active) setOcrLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [imageUri]);
 
   const handleSave = () => {
     if (!questionText.trim()) {
@@ -92,7 +115,15 @@ export function CreateMistakeScreen({ route, navigation }: { route: any; navigat
           <Image source={{ uri: imageUri }} style={styles.image} resizeMode="contain" />
         )}
 
-        <Text style={styles.label}>题干</Text>
+        <View style={styles.labelRow}>
+          <Text style={styles.label}>题干</Text>
+          {ocrLoading && (
+            <View style={styles.ocrHint}>
+              <ActivityIndicator size="small" color={Colors.primary} />
+              <Text style={styles.ocrHintText}>正在识别图片文字…</Text>
+            </View>
+          )}
+        </View>
         <TextInput
           style={styles.textArea}
           multiline
@@ -227,6 +258,22 @@ const styles = StyleSheet.create({
     color: Colors.text,
     marginBottom: 8,
     marginTop: 16,
+  },
+  labelRow: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  ocrHint: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 6,
+    marginTop: 16,
+    marginBottom: 8,
+  },
+  ocrHintText: {
+    fontSize: 12,
+    color: Colors.primary,
   },
   input: {
     backgroundColor: Colors.surface,

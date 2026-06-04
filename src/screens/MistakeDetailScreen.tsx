@@ -14,9 +14,9 @@ import { Colors } from '../constants/colors';
 import { StatusBadge } from '../components/StatusBadge';
 import { GRADE_LABELS } from '../constants/mistakeReasons';
 import { MISTAKE_REASONS } from '../constants/mistakeReasons';
-import { MockAiTutorService } from '../services/ai/MockAiTutorService';
+import { getAiTutorService } from '../services';
 
-const aiService = new MockAiTutorService();
+const aiService = getAiTutorService();
 
 export function MistakeDetailScreen({ route, navigation }: { route: any; navigation: any }) {
   const { mistakeId } = route.params as { mistakeId: string };
@@ -25,6 +25,7 @@ export function MistakeDetailScreen({ route, navigation }: { route: any; navigat
 
   const [hintLevel, setHintLevel] = useState(0);
   const [hintText, setHintText] = useState('');
+  const [hintLoading, setHintLoading] = useState(false);
 
   const reasonLabel = useMemo(
     () =>
@@ -43,10 +44,16 @@ export function MistakeDetailScreen({ route, navigation }: { route: any; navigat
   }
 
   const handleShowHint = async () => {
+    if (hintLoading) return;
     const nextLevel = Math.min(hintLevel + 1, 3) as 1 | 2 | 3;
-    const hint = await aiService.generateHint(mistake, nextLevel);
-    setHintLevel(nextLevel);
-    setHintText(hint);
+    setHintLoading(true);
+    try {
+      const hint = await aiService.generateHint(mistake, nextLevel);
+      setHintLevel(nextLevel);
+      setHintText(hint);
+    } finally {
+      setHintLoading(false);
+    }
   };
 
   const handleFeynman = () => {
@@ -145,8 +152,14 @@ export function MistakeDetailScreen({ route, navigation }: { route: any; navigat
         <View style={styles.section}>
           <Text style={styles.sectionLabel}>分层提示</Text>
           {hintLevel === 0 ? (
-            <TouchableOpacity style={styles.hintBtn} onPress={handleShowHint}>
-              <Text style={styles.hintBtnText}>看提示</Text>
+            <TouchableOpacity
+              style={styles.hintBtn}
+              onPress={handleShowHint}
+              disabled={hintLoading}
+            >
+              <Text style={styles.hintBtnText}>
+                {hintLoading ? '思考中…' : '看提示'}
+              </Text>
             </TouchableOpacity>
           ) : (
             <>
@@ -161,9 +174,17 @@ export function MistakeDetailScreen({ route, navigation }: { route: any; navigat
                 <Text style={styles.hintContent}>{hintText}</Text>
               </View>
               {hintLevel < 3 && (
-                <TouchableOpacity style={styles.hintBtn} onPress={handleShowHint}>
+                <TouchableOpacity
+                  style={styles.hintBtn}
+                  onPress={handleShowHint}
+                  disabled={hintLoading}
+                >
                   <Text style={styles.hintBtnText}>
-                    {hintLevel === 1 ? '看步骤' : '看完整解析'}
+                    {hintLoading
+                      ? '思考中…'
+                      : hintLevel === 1
+                        ? '看步骤'
+                        : '看完整解析'}
                   </Text>
                 </TouchableOpacity>
               )}

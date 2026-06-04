@@ -9,12 +9,13 @@ import {
   SafeAreaView,
   KeyboardAvoidingView,
   Platform,
+  ActivityIndicator,
 } from 'react-native';
 import { useMistakeStore } from '../store/mistakeStore';
 import { Colors } from '../constants/colors';
-import { MockAiTutorService } from '../services/ai/MockAiTutorService';
+import { getAiTutorService } from '../services';
 
-const aiService = new MockAiTutorService();
+const aiService = getAiTutorService();
 
 const FEYNMAN_QUESTIONS = [
   '这道题考的是什么知识点？',
@@ -45,9 +46,11 @@ export function FeynmanCoachScreen({ route, navigation }: { route: any; navigati
       text: FEYNMAN_QUESTIONS[0],
     },
   ]);
-  const [answers, setAnswers] = useState<string[]>([]);
-  const [totalScore, setTotalScore] = useState(0);
+  const [busy, setBusy] = useState(false);
   const [completed, setCompleted] = useState(false);
+
+  const answersRef = useRef<string[]>([]);
+  const awaitingFollowUpRef = useRef(false);
   const scrollRef = useRef<ScrollView>(null);
 
   if (!mistake) {
@@ -60,77 +63,98 @@ export function FeynmanCoachScreen({ route, navigation }: { route: any; navigati
     );
   }
 
-  const handleSend = async () => {
-    const text = inputText.trim();
-    if (!text) return;
-
-    const newMessages: ChatMessage[] = [
-      ...messages,
-      { role: 'student', text },
-    ];
-    setMessages(newMessages);
-    setInputText('');
-
-    const newAnswers = [...answers, text];
-    setAnswers(newAnswers);
-
-    const evaluation = await aiService.evaluateFeynmanResponse(
-      mistake,
-      currentQuestion,
-      text
-    );
-
-    const scoreForThisQ = evaluation.totalScore;
-    const newTotalScore = totalScore + scoreForThisQ;
-    setTotalScore(newTotalScore);
-
-    newMessages.push({ role: 'ai', text: evaluation.feedback });
-
-    if (evaluation.followUpQuestion && text.length < 30) {
-      newMessages.push({ role: 'ai', text: evaluation.followUpQuestion });
-      setMessages([...newMessages]);
-      scrollToBottom();
-      return;
-    }
-
-    const nextQ = currentQuestion + 1;
-    if (nextQ < FEYNMAN_QUESTIONS.length) {
-      setCurrentQuestion(nextQ);
-      newMessages.push({ role: 'ai', text: FEYNMAN_QUESTIONS[nextQ] });
-      setMessages([...newMessages]);
-    } else {
-      const finalScore = Math.min(10, Math.round(newTotalScore / FEYNMAN_QUESTIONS.length * 2.5));
-      const passed = finalScore >= 8;
-
-      const fullExplanation = newAnswers.join('\n');
-      updateFeynmanScore(mistake.id, fullExplanation, finalScore);
-
-      let resultText: string;
-      if (passed) {
-        resultText = `太棒了！你的讲题得分是 ${finalScore}/10 分！\n你已经把这道题讲明白了，真是个好老师！\n现在可以去做变式题，巩固一下吧。`;
-      } else {
-        resultText = `你的讲题得分是 ${finalScore}/10 分。\n还差一点点哦，再补充一下原因和步骤，争取达到 8 分以上！`;
-      }
-
-      newMessages.push({ role: 'ai', text: resultText });
-      setMessages([...newMessages]);
-      setCompleted(true);
-    }
-
-    scrollToBottom();
-  };
-
   const scrollToBottom = () => {
     setTimeout(() => scrollRef.current?.scrollToEnd({ animated: true }), 100);
   };
 
-  const handleFinish = () => {
-    navigation.goBack();
+  const pushMessages = (items: ChatMessage[]) => {
+    setMessages((prev) => [...prev, ...items]);
+    scrollToBottom();
   };
 
-  const handleVariants = () => {
-    navigation.replace('VariantPractice', { mistakeId: mistake.id });
+  const finishSession = async () => {
+    pushMessages([{ role: 'ai', text: '让我看看你刚才讲得怎么样…🤔' }]);
+    const evaluation = await aiService.scoreFeynmanSession(
+      mistake,
+      answersRef.current
+    );
+    const finalScore = evaluation.totalScore;
+    const passed = finalScore >= 8;
+
+    const fullExplanation = answersRef.current
+      .map((a, i) => `${FEYNMAN_QUESTIONS[i]}\n${a}`)
+      .join('\n\n');
+    updateFeynmanScore(mistake.id, fullExplanation, finalScore);
+
+    const resultText = passed
+      ? `太棒了！你的讲题得分是 ${finalScore}/10 分！\n${evaluation.feedback}\n现在可以去做变式题，巩固一下吧。`
+      : `你的讲题得分是 ${finalScore}/10 分。\n${evaluation.feedback}\n再补充一下原因和步骤，争取达到 8 分以上！`;
+
+    pushMessages([{ role: 'ai', text: resultText }]);
+    setCompleted(true);
   };
+
+  const advanceToNext = async () => {
+    const nextQ = currentQuestion + 1;
+    if (nextQ < FEYNMAN_QUESTIONS.length) {
+      setCurrentQuestion(nextQ);
+      pushMessages([{ role: 'ai', text: FEYNMAN_QUESTIONS[nextQ] }]);
+    } else {
+      await finishSession();
+    }
+  };
+
+  const handleSend = async () => {
+    const text = inputText.trim();
+    if (!text || busy) return;
+
+    setInputText('');
+    pushMessages([{ role: 'student', text }]);
+    setBusy(true);
+
+    try {
+      if (awaitingFollowUpRef.current) {
+        // 追问的补充回答：并入当前问题，然后进入下一题
+        answersRef.current[currentQuestion] =
+          `${answersRef.current[currentQuestion] ?? ''} ${text}`.trim();
+        awaitingFollowUpRef.current = false;
+
+        const reply = await aiService.respondToFeynmanAnswer(
+          mistake,
+          currentQuestion,
+          answersRef.current[currentQuestion],
+          answersRef.current
+        );
+        pushMessages([{ role: 'ai', text: reply.feedback }]);
+        await advanceToNext();
+      } else {
+        answersRef.current[currentQuestion] = text;
+
+        const reply = await aiService.respondToFeynmanAnswer(
+          mistake,
+          currentQuestion,
+          text,
+          answersRef.current
+        );
+        pushMessages([{ role: 'ai', text: reply.feedback }]);
+
+        const isLast = currentQuestion === FEYNMAN_QUESTIONS.length - 1;
+        if (reply.followUpQuestion && !isLast) {
+          awaitingFollowUpRef.current = true;
+          pushMessages([{ role: 'ai', text: reply.followUpQuestion }]);
+        } else {
+          await advanceToNext();
+        }
+      }
+    } finally {
+      setBusy(false);
+      scrollToBottom();
+    }
+  };
+
+  const handleFinish = () => navigation.goBack();
+  const handleVariants = () =>
+    navigation.replace('VariantPractice', { mistakeId: mistake.id });
 
   return (
     <SafeAreaView style={styles.safeArea}>
@@ -142,7 +166,8 @@ export function FeynmanCoachScreen({ route, navigation }: { route: any; navigati
         <View style={styles.headerBar}>
           <Text style={styles.headerTitle}>费曼讲题</Text>
           <Text style={styles.headerProgress}>
-            {Math.min(currentQuestion + 1, FEYNMAN_QUESTIONS.length)}/{FEYNMAN_QUESTIONS.length}
+            {Math.min(currentQuestion + 1, FEYNMAN_QUESTIONS.length)}/
+            {FEYNMAN_QUESTIONS.length}
           </Text>
         </View>
 
@@ -173,6 +198,13 @@ export function FeynmanCoachScreen({ route, navigation }: { route: any; navigati
             </View>
           ))}
 
+          {busy && (
+            <View style={[styles.bubble, styles.aiBubble, styles.typingBubble]}>
+              <ActivityIndicator size="small" color={Colors.primary} />
+              <Text style={styles.typingText}>AI小同学正在思考…</Text>
+            </View>
+          )}
+
           {completed && (
             <View style={styles.completedActions}>
               <TouchableOpacity style={styles.variantBtn} onPress={handleVariants}>
@@ -194,12 +226,16 @@ export function FeynmanCoachScreen({ route, navigation }: { route: any; navigati
               onChangeText={setInputText}
               multiline
               maxLength={500}
+              editable={!busy}
               placeholderTextColor={Colors.textLight}
             />
             <TouchableOpacity
-              style={[styles.sendBtn, !inputText.trim() && styles.sendBtnDisabled]}
+              style={[
+                styles.sendBtn,
+                (!inputText.trim() || busy) && styles.sendBtnDisabled,
+              ]}
               onPress={handleSend}
-              disabled={!inputText.trim()}
+              disabled={!inputText.trim() || busy}
             >
               <Text style={styles.sendBtnText}>发送</Text>
             </TouchableOpacity>
@@ -272,6 +308,15 @@ const styles = StyleSheet.create({
   },
   studentText: {
     color: Colors.white,
+  },
+  typingBubble: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    gap: 8,
+  },
+  typingText: {
+    fontSize: 14,
+    color: Colors.textSecondary,
   },
   inputBar: {
     flexDirection: 'row',

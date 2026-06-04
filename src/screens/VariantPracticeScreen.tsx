@@ -11,10 +11,10 @@ import {
 } from 'react-native';
 import { useMistakeStore } from '../store/mistakeStore';
 import { Colors } from '../constants/colors';
-import { RuleBasedVariantGenerator } from '../services/variants/RuleBasedVariantGenerator';
+import { getVariantGenerator } from '../services';
 import { VariantQuestion } from '../models/types';
 
-const generator = new RuleBasedVariantGenerator();
+const generator = getVariantGenerator();
 
 export function VariantPracticeScreen({ route, navigation }: { route: any; navigation: any }) {
   const { mistakeId } = route.params as { mistakeId: string };
