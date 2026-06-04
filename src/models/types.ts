@@ -15,7 +15,7 @@ export type MistakeReasonType =
   | 'transfer_error'
   | 'format_error';
 
-export type Grade = 3 | 4 | 5 | 6;
+export type Grade = 1 | 2 | 3 | 4 | 5 | 6;
 
 export type ReviewStage = 'D0' | 'D1' | 'D3' | 'D7' | 'D14' | 'D30';
 

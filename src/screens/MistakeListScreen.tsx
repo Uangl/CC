@@ -85,6 +85,8 @@ export function MistakeListScreen({ navigation }: { navigation: any }) {
             showsHorizontalScrollIndicator={false}
             data={[
               { value: 'all' as const, label: '全部年级' },
+              { value: 1 as const, label: '一年级' },
+              { value: 2 as const, label: '二年级' },
               { value: 3 as const, label: '三年级' },
               { value: 4 as const, label: '四年级' },
               { value: 5 as const, label: '五年级' },

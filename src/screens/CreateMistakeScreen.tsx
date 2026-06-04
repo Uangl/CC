@@ -24,7 +24,7 @@ export function CreateMistakeScreen({ route, navigation }: { route: any; navigat
   const [questionText, setQuestionText] = useState('');
   const [studentAnswer, setStudentAnswer] = useState('');
   const [correctAnswer, setCorrectAnswer] = useState('');
-  const [grade, setGrade] = useState<Grade>(4);
+  const [grade, setGrade] = useState<Grade>(3);
   const [selectedKp, setSelectedKp] = useState<KnowledgePoint | null>(null);
   const [selectedReason, setSelectedReason] = useState<MistakeReasonType | null>(null);
   const [showReasonFollowUp, setShowReasonFollowUp] = useState(false);
@@ -122,7 +122,7 @@ export function CreateMistakeScreen({ route, navigation }: { route: any; navigat
 
         <Text style={styles.label}>年级</Text>
         <View style={styles.chipRow}>
-          {([3, 4, 5, 6] as Grade[]).map((g) => (
+          {([1, 2, 3, 4, 5, 6] as Grade[]).map((g) => (
             <TouchableOpacity
               key={g}
               style={[styles.chip, grade === g && styles.chipActive]}
