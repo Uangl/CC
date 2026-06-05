@@ -1,6 +1,9 @@
 import { create } from 'zustand';
 import { apiFetch, setToken, loadToken } from '../services/api/client';
 
+const apiUrl = process.env.EXPO_PUBLIC_API_URL ?? '';
+const useBackend = apiUrl.length > 0;
+
 export interface User {
   id: number;
   phone: string;
@@ -10,6 +13,15 @@ export interface User {
   avatar_url?: string;
   created_at: string;
 }
+
+const OFFLINE_USER: User = {
+  id: 0,
+  phone: 'offline',
+  nickname: '本地用户',
+  role: 'user',
+  grade: 3,
+  created_at: new Date().toISOString(),
+};
 
 interface AuthStore {
   user: User | null;
@@ -31,6 +43,12 @@ export const useAuthStore = create<AuthStore>((set) => ({
 
   initialize: async () => {
     set({ loading: true, error: null });
+
+    if (!useBackend) {
+      set({ user: OFFLINE_USER, loading: false });
+      return;
+    }
+
     try {
       const token = await loadToken();
       if (!token) {
@@ -46,7 +64,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
   },
 
   login: async (phone, password) => {
-    set({ loading: true, error: null });
+    set({ error: null });
     try {
       const data = await apiFetch<{ token: string; user: User }>('/api/auth/login', {
         method: 'POST',
@@ -55,14 +73,14 @@ export const useAuthStore = create<AuthStore>((set) => ({
       await setToken(data.token);
       set({ user: data.user, loading: false });
     } catch (e: unknown) {
-      const msg = e instanceof Error ? e.message : '登录失败';
+      const msg = e instanceof Error ? e.message : '登录失败，请检查网络连接';
       set({ loading: false, error: msg });
       throw e;
     }
   },
 
   register: async (phone, password, nickname, grade) => {
-    set({ loading: true, error: null });
+    set({ error: null });
     try {
       const data = await apiFetch<{ token: string; user: User }>('/api/auth/register', {
         method: 'POST',
@@ -78,11 +96,15 @@ export const useAuthStore = create<AuthStore>((set) => ({
   },
 
   logout: async () => {
+    if (!useBackend) {
+      return;
+    }
     set({ user: null, loading: false, error: null });
     await setToken(null);
   },
 
   updateProfile: async (data) => {
+    if (!useBackend) return;
     try {
       const res = await apiFetch<{ user: User }>('/api/auth/me', {
         method: 'PUT',
@@ -90,7 +112,7 @@ export const useAuthStore = create<AuthStore>((set) => ({
       });
       set({ user: res.user });
     } catch {
-      // silently fail for profile updates
+      // silently fail
     }
   },
 

@@ -132,7 +132,7 @@ export function SettingsScreen() {
           <TouchableOpacity style={styles.dangerBtn} onPress={handleClearData}>
             <Text style={styles.dangerBtnText}>重置本地数据</Text>
           </TouchableOpacity>
-          {user && (
+          {user && user.phone !== 'offline' && (
             <TouchableOpacity style={styles.logoutBtn} onPress={handleLogout}>
               <Text style={styles.logoutBtnText}>退出登录</Text>
             </TouchableOpacity>

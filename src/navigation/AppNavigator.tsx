@@ -122,7 +122,8 @@ function MainTabs() {
 }
 
 export function AppNavigator() {
-  const { user, loading } = useAuthStore();
+  const user = useAuthStore((s) => s.user);
+  const loading = useAuthStore((s) => s.loading);
 
   if (loading) {
     return (

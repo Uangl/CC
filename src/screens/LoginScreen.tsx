@@ -12,6 +12,7 @@ import {
 } from 'react-native';
 import { Palette, Radius, Spacing, Shadow, Typo } from '../constants/theme';
 import { useAuthStore } from '../store/authStore';
+import { getApiUrl } from '../services/api/client';
 
 export function LoginScreen({ navigation }: { navigation: any }) {
   const login = useAuthStore((s) => s.login);
@@ -104,6 +105,9 @@ export function LoginScreen({ navigation }: { navigation: any }) {
             测试账号：test / test123{'\n'}
             管理员：admin / admin123
           </Text>
+          <Text style={styles.serverHint}>
+            服务器：{getApiUrl()}
+          </Text>
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
@@ -167,5 +171,11 @@ const styles = StyleSheet.create({
     textAlign: 'center',
     marginTop: Spacing.xl,
     lineHeight: 20,
+  },
+  serverHint: {
+    ...Typo.small,
+    textAlign: 'center',
+    marginTop: Spacing.sm,
+    color: Palette.textMuted,
   },
 });
