@@ -157,34 +157,38 @@ export const useMistakeStore = create<MistakeStore>((set, get) => ({
   },
 
   addMistake: async (mistakeData) => {
-    if (useBackend) {
-      try {
-        const body = toBackendCreate(mistakeData as Record<string, unknown>);
-        const data = await apiFetch<{ mistake: Record<string, unknown> }>('/api/mistakes', {
-          method: 'POST',
-          body: JSON.stringify(body),
-        });
-        const newMistake = toFrontend(data.mistake);
-        set((state) => ({ mistakes: [newMistake, ...state.mistakes] }));
-        get().persistMistakes();
-        return;
-      } catch {
-        // backend failed — fall through to local
-      }
-    }
-
     const now = new Date().toISOString();
+    const localId = generateId();
     const newMistake: Mistake = {
       ...mistakeData,
-      id: generateId(),
+      id: localId,
       subject: 'math',
       createdAt: now,
       updatedAt: now,
       variantQuestions: [],
       reviewHistory: [],
     };
+
     set((state) => ({ mistakes: [newMistake, ...state.mistakes] }));
     get().persistMistakes();
+
+    if (useBackend) {
+      const body = toBackendCreate(mistakeData as Record<string, unknown>);
+      apiFetch<{ mistake: Record<string, unknown> }>('/api/mistakes', {
+        method: 'POST',
+        body: JSON.stringify(body),
+      })
+        .then((data) => {
+          const serverMistake = toFrontend(data.mistake);
+          set((state) => ({
+            mistakes: state.mistakes.map((m) =>
+              m.id === localId ? serverMistake : m
+            ),
+          }));
+          get().persistMistakes();
+        })
+        .catch(() => {});
+    }
   },
 
   updateMistake: (id, updates) => {

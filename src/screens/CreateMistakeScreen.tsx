@@ -32,7 +32,6 @@ export function CreateMistakeScreen({ route, navigation }: { route: any; navigat
   const [selectedReason, setSelectedReason] = useState<MistakeReasonType | null>(null);
   const [showReasonFollowUp, setShowReasonFollowUp] = useState(false);
   const [ocrLoading, setOcrLoading] = useState(false);
-  const [saving, setSaving] = useState(false);
 
   const gradeKps = getKnowledgePointsByGrade(grade);
 
@@ -68,7 +67,7 @@ export function CreateMistakeScreen({ route, navigation }: { route: any; navigat
     return () => { cancelled = true; };
   }, [imageUri]);
 
-  const handleSave = async () => {
+  const handleSave = () => {
     if (!questionText.trim()) {
       Alert.alert('请输入题干');
       return;
@@ -90,31 +89,24 @@ export function CreateMistakeScreen({ route, navigation }: { route: any; navigat
       return;
     }
 
-    setSaving(true);
-    try {
-      await addMistake({
-        imageUri,
-        grade,
-        questionText: questionText.trim(),
-        studentAnswer: studentAnswer.trim(),
-        correctAnswer: correctAnswer.trim(),
-        explanation: '',
-        knowledgePointId: selectedKp.id,
-        knowledgePointName: selectedKp.name,
-        mistakeReason: selectedReason,
-        difficulty: 1,
-        status: 'captured',
-        reviewStage: 'D0',
-      });
+    addMistake({
+      imageUri,
+      grade,
+      questionText: questionText.trim(),
+      studentAnswer: studentAnswer.trim(),
+      correctAnswer: correctAnswer.trim(),
+      explanation: '',
+      knowledgePointId: selectedKp.id,
+      knowledgePointName: selectedKp.name,
+      mistakeReason: selectedReason,
+      difficulty: 1,
+      status: 'captured',
+      reviewStage: 'D0',
+    });
 
-      Alert.alert('保存成功', '错题已收录！', [
-        { text: '好的', onPress: () => navigation.popToTop() },
-      ]);
-    } catch {
-      Alert.alert('保存失败', '请检查网络后重试');
-    } finally {
-      setSaving(false);
-    }
+    Alert.alert('保存成功', '错题已收录！', [
+      { text: '好的', onPress: () => navigation.popToTop() },
+    ]);
   };
 
   const handleReasonSelect = (reason: MistakeReasonType) => {
@@ -241,16 +233,8 @@ export function CreateMistakeScreen({ route, navigation }: { route: any; navigat
           </View>
         )}
 
-        <TouchableOpacity
-          style={[styles.saveBtn, saving && styles.saveBtnDisabled]}
-          onPress={handleSave}
-          disabled={saving}
-        >
-          {saving ? (
-            <ActivityIndicator size="small" color={Palette.textInverse} />
-          ) : (
-            <Text style={styles.saveBtnText}>保存错题</Text>
-          )}
+        <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
+          <Text style={styles.saveBtnText}>保存错题</Text>
         </TouchableOpacity>
 
         <View style={{ height: 40 }} />
@@ -388,9 +372,6 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: Spacing.xxl,
     ...Shadow,
-  },
-  saveBtnDisabled: {
-    opacity: 0.7,
   },
   saveBtnText: {
     color: Palette.textInverse,

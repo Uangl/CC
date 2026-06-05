@@ -78,8 +78,8 @@ export const useAuthStore = create<AuthStore>((set) => ({
   },
 
   logout: async () => {
+    set({ user: null, loading: false, error: null });
     await setToken(null);
-    set({ user: null, error: null });
   },
 
   updateProfile: async (data) => {
