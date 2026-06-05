@@ -18,6 +18,7 @@ import { GRADE_LABELS } from '../constants/mistakeReasons';
 import { useMistakeStore } from '../store/mistakeStore';
 import { Grade, MistakeReasonType, KnowledgePoint } from '../models/types';
 import { backendEnabled } from '../services';
+import { apiUpload } from '../services/api/client';
 
 export function CreateMistakeScreen({ route, navigation }: { route: any; navigation: any }) {
   const imageUri = route.params?.imageUri as string | undefined;
@@ -31,17 +32,43 @@ export function CreateMistakeScreen({ route, navigation }: { route: any; navigat
   const [selectedReason, setSelectedReason] = useState<MistakeReasonType | null>(null);
   const [showReasonFollowUp, setShowReasonFollowUp] = useState(false);
   const [ocrLoading, setOcrLoading] = useState(false);
+  const [saving, setSaving] = useState(false);
 
   const gradeKps = getKnowledgePointsByGrade(grade);
 
-  // 有图片且连接后端时，尝试 OCR 识别（后端代理百度 OCR）
   useEffect(() => {
     if (!imageUri || !backendEnabled) return;
-    // OCR 在后端通过文件上传实现，移动端需要另外处理 multipart/form-data
-    // 当前先跳过自动识别，用户手动输入题干
+    let cancelled = false;
+
+    const doOcr = async () => {
+      setOcrLoading(true);
+      try {
+        const formData = new FormData();
+        formData.append('image', {
+          uri: imageUri,
+          type: 'image/jpeg',
+          name: 'photo.jpg',
+        } as unknown as Blob);
+
+        const result = await apiUpload<{ questionText: string; confidence: number }>(
+          '/api/ocr/recognize',
+          formData
+        );
+        if (!cancelled && result.questionText) {
+          setQuestionText(result.questionText);
+        }
+      } catch {
+        // OCR failed silently — user can type manually
+      } finally {
+        if (!cancelled) setOcrLoading(false);
+      }
+    };
+
+    doOcr();
+    return () => { cancelled = true; };
   }, [imageUri]);
 
-  const handleSave = () => {
+  const handleSave = async () => {
     if (!questionText.trim()) {
       Alert.alert('请输入题干');
       return;
@@ -63,24 +90,31 @@ export function CreateMistakeScreen({ route, navigation }: { route: any; navigat
       return;
     }
 
-    addMistake({
-      imageUri,
-      grade,
-      questionText: questionText.trim(),
-      studentAnswer: studentAnswer.trim(),
-      correctAnswer: correctAnswer.trim(),
-      explanation: '',
-      knowledgePointId: selectedKp.id,
-      knowledgePointName: selectedKp.name,
-      mistakeReason: selectedReason,
-      difficulty: 1,
-      status: 'captured',
-      reviewStage: 'D0',
-    });
+    setSaving(true);
+    try {
+      await addMistake({
+        imageUri,
+        grade,
+        questionText: questionText.trim(),
+        studentAnswer: studentAnswer.trim(),
+        correctAnswer: correctAnswer.trim(),
+        explanation: '',
+        knowledgePointId: selectedKp.id,
+        knowledgePointName: selectedKp.name,
+        mistakeReason: selectedReason,
+        difficulty: 1,
+        status: 'captured',
+        reviewStage: 'D0',
+      });
 
-    Alert.alert('保存成功', '错题已收录！', [
-      { text: '好的', onPress: () => navigation.popToTop() },
-    ]);
+      Alert.alert('保存成功', '错题已收录！', [
+        { text: '好的', onPress: () => navigation.popToTop() },
+      ]);
+    } catch {
+      Alert.alert('保存失败', '请检查网络后重试');
+    } finally {
+      setSaving(false);
+    }
   };
 
   const handleReasonSelect = (reason: MistakeReasonType) => {
@@ -207,8 +241,16 @@ export function CreateMistakeScreen({ route, navigation }: { route: any; navigat
           </View>
         )}
 
-        <TouchableOpacity style={styles.saveBtn} onPress={handleSave}>
-          <Text style={styles.saveBtnText}>保存错题</Text>
+        <TouchableOpacity
+          style={[styles.saveBtn, saving && styles.saveBtnDisabled]}
+          onPress={handleSave}
+          disabled={saving}
+        >
+          {saving ? (
+            <ActivityIndicator size="small" color={Palette.textInverse} />
+          ) : (
+            <Text style={styles.saveBtnText}>保存错题</Text>
+          )}
         </TouchableOpacity>
 
         <View style={{ height: 40 }} />
@@ -346,6 +388,9 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginTop: Spacing.xxl,
     ...Shadow,
+  },
+  saveBtnDisabled: {
+    opacity: 0.7,
   },
   saveBtnText: {
     color: Palette.textInverse,

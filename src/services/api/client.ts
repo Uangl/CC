@@ -68,3 +68,37 @@ export async function apiFetch<T = unknown>(
     clearTimeout(timer);
   }
 }
+
+export async function apiUpload<T = unknown>(
+  path: string,
+  formData: FormData,
+  options: { timeout?: number } = {}
+): Promise<T> {
+  const token = await loadToken();
+  const { timeout = 30000 } = options;
+
+  const controller = new AbortController();
+  const timer = setTimeout(() => controller.abort(), timeout);
+
+  try {
+    const res = await fetch(`${baseUrl}${path}`, {
+      method: 'POST',
+      signal: controller.signal,
+      headers: {
+        ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      },
+      body: formData,
+    });
+
+    const data = await res.json();
+
+    if (!res.ok) {
+      const msg = (data as { error?: string }).error || `请求失败 (${res.status})`;
+      throw new Error(msg);
+    }
+
+    return data as T;
+  } finally {
+    clearTimeout(timer);
+  }
+}
