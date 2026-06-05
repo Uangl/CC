@@ -8,21 +8,45 @@
     "userInterfaceStyle": "light",
     "newArchEnabled": true,
     "splash": {
+      "image": "./assets/splash.png",
+      "resizeMode": "contain",
       "backgroundColor": "#5B6EF5"
     },
     "ios": {
-      "supportsTablet": true
+      "supportsTablet": true,
+      "bundleIdentifier": "com.cuoti.xiaolaoshi",
+      "infoPlist": {
+        "NSCameraUsageDescription": "拍照录入错题需要使用相机",
+        "NSPhotoLibraryUsageDescription": "从相册选择错题图片"
+      }
     },
     "android": {
+      "package": "com.cuoti.xiaolaoshi",
+      "versionCode": 1,
       "adaptiveIcon": {
+        "foregroundImage": "./assets/adaptive-icon.png",
         "backgroundColor": "#5B6EF5"
-      }
+      },
+      "permissions": [
+        "CAMERA"
+      ]
     },
     "web": {
       "favicon": "./assets/favicon.png"
     },
     "plugins": [
-      "expo-image-picker"
-    ]
+      [
+        "expo-image-picker",
+        {
+          "photosPermission": "从相册选择错题图片",
+          "cameraPermission": "拍照录入错题需要使用相机"
+        }
+      ]
+    ],
+    "extra": {
+      "eas": {
+        "projectId": ""
+      }
+    }
   }
 }
