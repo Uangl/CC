@@ -61,21 +61,29 @@ export function AdminScreen() {
       { text: '取消', style: 'cancel' },
       {
         text: '确定',
-        onPress: async () => {
-          await apiFetch(`/api/admin/users/${userId}/reset-password`, { method: 'POST' });
-          Alert.alert('已重置', '新密码：reset123');
+        onPress: () => {
+          apiFetch(`/api/admin/users/${userId}/reset-password`, { method: 'POST' })
+            .then(() => Alert.alert('已重置', '新密码：reset123'))
+            .catch(() => Alert.alert('操作失败', '请检查网络'));
         },
       },
     ]);
   };
 
-  const handleToggleRole = async (user: AdminUser) => {
+  const handleToggleRole = (user: AdminUser) => {
     const newRole = user.role === 'admin' ? 'user' : 'admin';
-    await apiFetch(`/api/admin/users/${user.id}`, {
+    setUsers((prev) =>
+      prev.map((u) => (u.id === user.id ? { ...u, role: newRole } : u))
+    );
+    apiFetch(`/api/admin/users/${user.id}`, {
       method: 'PUT',
       body: JSON.stringify({ role: newRole }),
+    }).catch(() => {
+      setUsers((prev) =>
+        prev.map((u) => (u.id === user.id ? { ...u, role: user.role } : u))
+      );
+      Alert.alert('操作失败', '请检查网络');
     });
-    fetchData();
   };
 
   if (loading) {
