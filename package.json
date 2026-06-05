@@ -1,17 +1,33 @@
 {
-  "name": "concrete-mix-online",
+  "name": "cuoti-xiaolaoshi",
   "version": "1.0.0",
-  "description": "混凝土配合比智能推荐工具 · 联网版（云端中心台账 + AI 智能研判）",
-  "main": "server.js",
+  "description": "错题小老师 - 小学数学AI错题补弱App",
+  "main": "node_modules/expo/AppEntry.js",
   "scripts": {
-    "start": "node server.js",
-    "dev": "node --watch server.js"
-  },
-  "engines": {
-    "node": ">=18"
+    "start": "expo start",
+    "android": "expo start --android",
+    "ios": "expo start --ios",
+    "web": "expo start --web",
+    "typecheck": "tsc --noEmit"
   },
   "dependencies": {
-    "dotenv": "^17.4.2",
-    "express": "^4.22.2"
-  }
+    "@react-native-async-storage/async-storage": "2.2.0",
+    "@react-navigation/bottom-tabs": "^7.16.0",
+    "@react-navigation/native": "^7.2.0",
+    "@react-navigation/native-stack": "^7.16.0",
+    "expo": "~54.0.35",
+    "expo-file-system": "~19.0.23",
+    "expo-image-picker": "~17.0.11",
+    "expo-status-bar": "~3.0.9",
+    "react": "19.1.0",
+    "react-native": "0.81.5",
+    "react-native-safe-area-context": "~5.6.0",
+    "react-native-screens": "~4.16.0",
+    "zustand": "^4.5.0"
+  },
+  "devDependencies": {
+    "@types/react": "~19.1.10",
+    "typescript": "~5.8.0"
+  },
+  "private": true
 }
