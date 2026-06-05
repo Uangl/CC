@@ -9,7 +9,7 @@ import {
   Image,
 } from 'react-native';
 import * as ImagePicker from 'expo-image-picker';
-import { Colors } from '../constants/colors';
+import { Palette, Radius, Spacing, Shadow, Typo } from '../constants/theme';
 
 export function CaptureScreen({ navigation }: { navigation: any }) {
   const handleCamera = async () => {
@@ -55,22 +55,34 @@ export function CaptureScreen({ navigation }: { navigation: any }) {
         </Text>
 
         <View style={styles.options}>
-          <TouchableOpacity style={styles.optionCard} onPress={handleCamera}>
-            <Text style={styles.optionIcon}>📸</Text>
-            <Text style={styles.optionTitle}>拍照</Text>
-            <Text style={styles.optionDesc}>用相机拍下错题</Text>
+          <TouchableOpacity style={styles.optionCard} onPress={handleCamera} activeOpacity={0.85}>
+            <View style={styles.iconCircle}>
+              <Text style={styles.optionIcon}>📸</Text>
+            </View>
+            <View style={styles.optionTextWrap}>
+              <Text style={styles.optionTitle}>拍照</Text>
+              <Text style={styles.optionDesc}>用相机拍下错题</Text>
+            </View>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.optionCard} onPress={handleGallery}>
-            <Text style={styles.optionIcon}>🖼️</Text>
-            <Text style={styles.optionTitle}>从相册选择</Text>
-            <Text style={styles.optionDesc}>选择已有的错题照片</Text>
+          <TouchableOpacity style={styles.optionCard} onPress={handleGallery} activeOpacity={0.85}>
+            <View style={styles.iconCircle}>
+              <Text style={styles.optionIcon}>🖼️</Text>
+            </View>
+            <View style={styles.optionTextWrap}>
+              <Text style={styles.optionTitle}>从相册选择</Text>
+              <Text style={styles.optionDesc}>选择已有的错题照片</Text>
+            </View>
           </TouchableOpacity>
 
-          <TouchableOpacity style={styles.optionCard} onPress={handleManual}>
-            <Text style={styles.optionIcon}>✏️</Text>
-            <Text style={styles.optionTitle}>手动录入</Text>
-            <Text style={styles.optionDesc}>直接输入题目内容</Text>
+          <TouchableOpacity style={styles.optionCard} onPress={handleManual} activeOpacity={0.85}>
+            <View style={styles.iconCircle}>
+              <Text style={styles.optionIcon}>✏️</Text>
+            </View>
+            <View style={styles.optionTextWrap}>
+              <Text style={styles.optionTitle}>手动录入</Text>
+              <Text style={styles.optionDesc}>直接输入题目内容</Text>
+            </View>
           </TouchableOpacity>
         </View>
       </View>
@@ -81,50 +93,52 @@ export function CaptureScreen({ navigation }: { navigation: any }) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: Palette.bg,
   },
   container: {
     flex: 1,
-    padding: 20,
+    padding: Spacing.xl,
   },
   title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: Colors.text,
-    marginBottom: 8,
+    ...Typo.h2,
+    marginBottom: Spacing.sm,
   },
   subtitle: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    marginBottom: 32,
+    ...Typo.caption,
+    marginBottom: Spacing.xxl,
     lineHeight: 20,
   },
   options: {
-    gap: 16,
+    gap: Spacing.lg,
   },
   optionCard: {
-    backgroundColor: Colors.surface,
-    borderRadius: 16,
-    padding: 24,
+    flexDirection: 'row',
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    backgroundColor: Palette.surface,
+    borderRadius: Radius.lg,
+    padding: Spacing.lg,
+    ...Shadow,
+  },
+  iconCircle: {
+    width: 56,
+    height: 56,
+    borderRadius: Radius.full,
+    backgroundColor: Palette.primaryBg,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginRight: Spacing.lg,
   },
   optionIcon: {
-    fontSize: 40,
-    marginBottom: 12,
+    fontSize: 28,
+  },
+  optionTextWrap: {
+    flex: 1,
   },
   optionTitle: {
-    fontSize: 17,
-    fontWeight: '600',
-    color: Colors.text,
-    marginBottom: 4,
+    ...Typo.h3,
+    marginBottom: 2,
   },
   optionDesc: {
-    fontSize: 13,
-    color: Colors.textSecondary,
+    ...Typo.caption,
   },
 });

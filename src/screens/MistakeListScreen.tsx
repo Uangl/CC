@@ -9,7 +9,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { useMistakeStore } from '../store/mistakeStore';
-import { Colors } from '../constants/colors';
+import { Palette, Radius, Spacing, ShadowLight, Typo } from '../constants/theme';
 import { MistakeCardPreview } from '../components/MistakeCardPreview';
 import { EmptyState } from '../components/EmptyState';
 import { STATUS_LABELS, GRADE_LABELS } from '../constants/mistakeReasons';
@@ -50,7 +50,7 @@ export function MistakeListScreen({ navigation }: { navigation: any }) {
           placeholder="搜索题干..."
           value={searchText}
           onChangeText={setSearchText}
-          placeholderTextColor={Colors.textLight}
+          placeholderTextColor={Palette.textMuted}
         />
 
         <View style={styles.filterSection}>
@@ -143,53 +143,52 @@ export function MistakeListScreen({ navigation }: { navigation: any }) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: Palette.bg,
   },
   container: {
     flex: 1,
-    padding: 20,
+    padding: Spacing.xl,
   },
   title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: Colors.text,
-    marginBottom: 16,
+    ...Typo.h2,
+    marginBottom: Spacing.lg,
   },
   searchInput: {
-    backgroundColor: Colors.surface,
-    borderRadius: 10,
-    padding: 12,
+    backgroundColor: Palette.surface,
+    borderRadius: Radius.md,
+    padding: Spacing.md,
     fontSize: 15,
-    color: Colors.text,
-    marginBottom: 12,
+    color: Palette.text,
+    marginBottom: Spacing.md,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Palette.border,
+    ...ShadowLight,
   },
   filterSection: {
-    marginBottom: 12,
+    marginBottom: Spacing.md,
   },
   filterList: {
-    marginBottom: 8,
+    marginBottom: Spacing.sm,
   },
   filterChip: {
-    paddingHorizontal: 14,
-    paddingVertical: 6,
-    borderRadius: 16,
-    backgroundColor: Colors.surface,
-    marginRight: 8,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    borderRadius: Radius.full,
+    backgroundColor: Palette.surface,
+    marginRight: Spacing.sm,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Palette.border,
   },
   filterChipActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
+    backgroundColor: Palette.primary,
+    borderColor: Palette.primary,
   },
   filterText: {
     fontSize: 13,
-    color: Colors.textSecondary,
+    color: Palette.textSecondary,
   },
   filterTextActive: {
-    color: Colors.white,
+    color: Palette.textInverse,
     fontWeight: '600',
   },
   emptyList: {

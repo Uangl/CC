@@ -7,7 +7,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { useMistakeStore } from '../store/mistakeStore';
-import { Colors } from '../constants/colors';
+import { Palette, Radius, Spacing, Shadow, Typo } from '../constants/theme';
 import { AnalyticsService } from '../services/analytics/AnalyticsService';
 import { EmptyState } from '../components/EmptyState';
 import { GRADE_LABELS } from '../constants/mistakeReasons';
@@ -19,15 +19,15 @@ export function WeakPointsScreen() {
   const weakPoints = useMemo(() => analytics.getWeakPoints(mistakes), [mistakes]);
 
   const getMasteryColor = (mastery: number) => {
-    if (mastery < 40) return Colors.error;
-    if (mastery < 70) return Colors.orange;
-    return Colors.green;
+    if (mastery < 40) return Palette.error;
+    if (mastery < 70) return Palette.warning;
+    return Palette.success;
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safe}>
       <View style={styles.container}>
-        <Text style={styles.title}>薄弱知识点</Text>
+        <Text style={Typo.h2}>薄弱知识点</Text>
 
         <FlatList
           data={weakPoints}
@@ -35,11 +35,16 @@ export function WeakPointsScreen() {
           renderItem={({ item }) => (
             <View style={styles.card}>
               <View style={styles.cardHeader}>
-                <View>
+                <View style={styles.cardHeaderInfo}>
                   <Text style={styles.kpName}>{item.knowledgePointName}</Text>
                   <Text style={styles.kpGrade}>{GRADE_LABELS[item.grade]}</Text>
                 </View>
-                <View style={styles.masteryCircle}>
+                <View
+                  style={[
+                    styles.masteryCircle,
+                    { backgroundColor: getMasteryColor(item.mastery) + '18' },
+                  ]}
+                >
                   <Text
                     style={[styles.masteryText, { color: getMasteryColor(item.mastery) }]}
                   >
@@ -91,7 +96,9 @@ export function WeakPointsScreen() {
             />
           }
           showsVerticalScrollIndicator={false}
-          contentContainerStyle={weakPoints.length === 0 ? styles.emptyList : undefined}
+          contentContainerStyle={
+            weakPoints.length === 0 ? styles.emptyList : styles.listContent
+          }
         />
       </View>
     </SafeAreaView>
@@ -99,104 +106,98 @@ export function WeakPointsScreen() {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
+  safe: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: Palette.bg,
   },
   container: {
     flex: 1,
-    padding: 20,
+    padding: Spacing.xl,
   },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: Colors.text,
-    marginBottom: 16,
+  listContent: {
+    paddingTop: Spacing.lg,
+    paddingBottom: Spacing.xl,
   },
   card: {
-    backgroundColor: Colors.surface,
-    borderRadius: 16,
-    padding: 18,
-    marginBottom: 14,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    backgroundColor: Palette.surface,
+    borderRadius: Radius.lg,
+    padding: Spacing.lg,
+    marginBottom: Spacing.md,
+    ...Shadow,
   },
   cardHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: Spacing.md,
+  },
+  cardHeaderInfo: {
+    flex: 1,
+    marginRight: Spacing.md,
   },
   kpName: {
-    fontSize: 16,
-    fontWeight: '600',
-    color: Colors.text,
+    ...Typo.h3,
     marginBottom: 2,
   },
   kpGrade: {
-    fontSize: 12,
-    color: Colors.textSecondary,
+    ...Typo.small,
   },
   masteryCircle: {
-    width: 50,
-    height: 50,
-    borderRadius: 25,
-    backgroundColor: Colors.grayLight,
+    width: 52,
+    height: 52,
+    borderRadius: 26,
     justifyContent: 'center',
     alignItems: 'center',
   },
   masteryText: {
-    fontSize: 14,
+    fontSize: 15,
     fontWeight: '700',
   },
   progressBar: {
-    height: 6,
-    backgroundColor: Colors.grayLight,
-    borderRadius: 3,
-    marginBottom: 14,
+    height: 8,
+    backgroundColor: Palette.divider,
+    borderRadius: Radius.full,
+    marginBottom: Spacing.lg,
+    overflow: 'hidden',
   },
   progressFill: {
-    height: 6,
-    borderRadius: 3,
+    height: 8,
+    borderRadius: Radius.full,
   },
   statsRow: {
     flexDirection: 'row',
-    gap: 12,
-    marginBottom: 12,
+    gap: Spacing.sm,
+    marginBottom: Spacing.md,
   },
   statItem: {
     flex: 1,
-    backgroundColor: Colors.grayLight,
-    borderRadius: 8,
-    padding: 10,
+    backgroundColor: Palette.bg,
+    borderRadius: Radius.sm,
+    paddingVertical: Spacing.md,
     alignItems: 'center',
   },
   statValue: {
-    fontSize: 18,
+    ...Typo.h3,
     fontWeight: '700',
-    color: Colors.text,
   },
   statLabel: {
-    fontSize: 11,
-    color: Colors.textSecondary,
+    ...Typo.small,
     marginTop: 2,
   },
   reasonTag: {
-    backgroundColor: Colors.orange + '12',
-    borderRadius: 6,
-    padding: 8,
-    marginBottom: 10,
+    backgroundColor: Palette.warningBg,
+    borderRadius: Radius.sm,
+    paddingVertical: Spacing.sm,
+    paddingHorizontal: Spacing.md,
+    marginBottom: Spacing.sm,
   },
   reasonText: {
     fontSize: 13,
-    color: Colors.orange,
+    color: Palette.warning,
+    fontWeight: '600',
   },
   suggestion: {
-    fontSize: 13,
-    color: Colors.textSecondary,
+    ...Typo.caption,
     lineHeight: 20,
   },
   emptyList: {

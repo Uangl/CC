@@ -10,7 +10,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { useMistakeStore } from '../store/mistakeStore';
-import { Colors } from '../constants/colors';
+import { Palette, Radius, Spacing, Shadow, Typo } from '../constants/theme';
 import { StatusBadge } from '../components/StatusBadge';
 import { GRADE_LABELS } from '../constants/mistakeReasons';
 import { MISTAKE_REASONS } from '../constants/mistakeReasons';
@@ -126,7 +126,7 @@ export function MistakeDetailScreen({ route, navigation }: { route: any; navigat
           <View style={styles.infoRow}>
             <View style={styles.infoItem}>
               <Text style={styles.infoLabel}>下次复习</Text>
-              <Text style={[styles.infoValue, { color: Colors.orange }]}>
+              <Text style={[styles.infoValue, { color: Palette.warning }]}>
                 {formatDate(mistake.nextReviewAt)}
               </Text>
             </View>
@@ -209,7 +209,7 @@ export function MistakeDetailScreen({ route, navigation }: { route: any; navigat
               onPress={handleMastered}
             >
               <Text style={styles.actionIcon}>✅</Text>
-              <Text style={[styles.actionText, { color: Colors.green }]}>
+              <Text style={[styles.actionText, { color: Palette.success }]}>
                 标记已掌握
               </Text>
             </TouchableOpacity>
@@ -226,7 +226,7 @@ export function MistakeDetailScreen({ route, navigation }: { route: any; navigat
                 <Text
                   style={[
                     styles.historyResult,
-                    { color: rh.passed ? Colors.green : Colors.error },
+                    { color: rh.passed ? Palette.success : Palette.error },
                   ]}
                 >
                   {rh.passed ? '通过' : '未通过'}
@@ -245,11 +245,11 @@ export function MistakeDetailScreen({ route, navigation }: { route: any; navigat
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: Palette.bg,
   },
   container: {
     flex: 1,
-    padding: 20,
+    padding: Spacing.xl,
   },
   center: {
     flex: 1,
@@ -260,175 +260,177 @@ const styles = StyleSheet.create({
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 16,
+    marginBottom: Spacing.lg,
   },
   grade: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    fontWeight: '500',
+    ...Typo.label,
+    color: Palette.textSecondary,
   },
   image: {
     width: '100%',
     height: 200,
-    borderRadius: 12,
-    backgroundColor: Colors.grayLight,
-    marginBottom: 16,
+    borderRadius: Radius.md,
+    backgroundColor: Palette.divider,
+    marginBottom: Spacing.lg,
   },
   section: {
-    marginBottom: 20,
+    marginBottom: Spacing.xl,
   },
   sectionLabel: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: Colors.text,
-    marginBottom: 8,
+    ...Typo.label,
+    color: Palette.textSecondary,
+    marginBottom: Spacing.sm,
   },
   questionText: {
+    ...Typo.body,
     fontSize: 16,
-    color: Colors.text,
     lineHeight: 24,
-    backgroundColor: Colors.surface,
-    padding: 14,
-    borderRadius: 10,
+    backgroundColor: Palette.surface,
+    padding: Spacing.lg,
+    borderRadius: Radius.md,
+    ...Shadow,
   },
   answerRow: {
     flexDirection: 'row',
-    gap: 12,
-    marginBottom: 16,
+    gap: Spacing.md,
+    marginBottom: Spacing.lg,
   },
   answerBox: {
     flex: 1,
-    padding: 14,
-    borderRadius: 10,
+    padding: Spacing.lg,
+    borderRadius: Radius.md,
+    borderWidth: 1,
   },
   wrongAnswer: {
-    backgroundColor: Colors.error + '10',
+    backgroundColor: Palette.errorBg,
+    borderColor: Palette.error + '30',
   },
   correctAnswer: {
-    backgroundColor: Colors.green + '10',
+    backgroundColor: Palette.successBg,
+    borderColor: Palette.success + '30',
   },
   answerLabel: {
-    fontSize: 12,
-    color: Colors.textSecondary,
-    marginBottom: 4,
+    ...Typo.small,
+    marginBottom: Spacing.xs,
   },
   answerValue: {
     fontSize: 15,
     fontWeight: '600',
-    color: Colors.text,
+    color: Palette.text,
   },
   infoRow: {
     flexDirection: 'row',
-    gap: 12,
-    marginBottom: 12,
+    gap: Spacing.md,
+    marginBottom: Spacing.md,
   },
   infoItem: {
     flex: 1,
-    backgroundColor: Colors.surface,
-    padding: 12,
-    borderRadius: 10,
+    backgroundColor: Palette.surface,
+    padding: Spacing.md,
+    borderRadius: Radius.md,
+    ...Shadow,
   },
   infoLabel: {
-    fontSize: 12,
-    color: Colors.textSecondary,
-    marginBottom: 4,
+    ...Typo.small,
+    marginBottom: Spacing.xs,
   },
   infoValue: {
     fontSize: 14,
-    fontWeight: '500',
-    color: Colors.text,
+    fontWeight: '600',
+    color: Palette.text,
   },
   feynmanScore: {
     fontSize: 14,
-    color: Colors.primary,
-    fontWeight: '600',
-    marginBottom: 6,
+    color: Palette.primary,
+    fontWeight: '700',
+    marginBottom: Spacing.sm,
   },
   feynmanText: {
+    ...Typo.body,
     fontSize: 14,
-    color: Colors.text,
-    lineHeight: 22,
-    backgroundColor: Colors.surface,
-    padding: 12,
-    borderRadius: 8,
+    backgroundColor: Palette.surface,
+    padding: Spacing.md,
+    borderRadius: Radius.sm,
+    ...Shadow,
   },
   hintBtn: {
-    backgroundColor: Colors.primary + '15',
-    borderRadius: 10,
-    padding: 14,
+    backgroundColor: Palette.primaryBg,
+    borderRadius: Radius.md,
+    padding: Spacing.lg,
     alignItems: 'center',
-    marginTop: 8,
+    marginTop: Spacing.sm,
   },
   hintBtnText: {
-    color: Colors.primary,
+    color: Palette.primary,
     fontSize: 14,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   hintBox: {
-    backgroundColor: Colors.surface,
-    borderRadius: 10,
-    padding: 14,
+    backgroundColor: Palette.surface,
+    borderRadius: Radius.md,
+    padding: Spacing.lg,
     borderLeftWidth: 3,
-    borderLeftColor: Colors.primary,
+    borderLeftColor: Palette.primary,
+    ...Shadow,
   },
   hintLevel: {
     fontSize: 13,
-    fontWeight: '600',
-    color: Colors.primary,
-    marginBottom: 6,
+    fontWeight: '700',
+    color: Palette.primary,
+    marginBottom: Spacing.sm,
   },
   hintContent: {
+    ...Typo.body,
     fontSize: 14,
-    color: Colors.text,
-    lineHeight: 22,
   },
   actions: {
-    gap: 10,
-    marginBottom: 20,
+    gap: Spacing.sm,
+    marginBottom: Spacing.xl,
   },
   actionBtn: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surface,
-    borderRadius: 12,
-    padding: 16,
+    backgroundColor: Palette.surface,
+    borderRadius: Radius.md,
+    padding: Spacing.lg,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Palette.border,
+    ...Shadow,
   },
   actionMaster: {
-    borderColor: Colors.green + '40',
-    backgroundColor: Colors.green + '08',
+    borderColor: Palette.success + '40',
+    backgroundColor: Palette.successBg,
   },
   actionIcon: {
     fontSize: 20,
-    marginRight: 12,
+    marginRight: Spacing.md,
   },
   actionText: {
     fontSize: 15,
     fontWeight: '600',
-    color: Colors.text,
+    color: Palette.text,
   },
   historyItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surface,
-    padding: 12,
-    borderRadius: 8,
-    marginBottom: 6,
-    gap: 12,
+    backgroundColor: Palette.surface,
+    padding: Spacing.md,
+    borderRadius: Radius.sm,
+    marginBottom: Spacing.sm,
+    gap: Spacing.md,
+    ...Shadow,
   },
   historyDate: {
-    fontSize: 13,
-    color: Colors.textSecondary,
+    ...Typo.caption,
     flex: 1,
   },
   historyStage: {
     fontSize: 13,
-    color: Colors.primary,
-    fontWeight: '500',
+    color: Palette.primary,
+    fontWeight: '600',
   },
   historyResult: {
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: '700',
   },
 });

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet, TouchableOpacity } from 'react-native';
 import { Mistake } from '../models/types';
-import { Colors } from '../constants/colors';
+import { Palette, Radius, Spacing, Shadow, Typo } from '../constants/theme';
 import { StatusBadge } from './StatusBadge';
 import { GRADE_LABELS } from '../constants/mistakeReasons';
 
@@ -45,31 +45,24 @@ function formatReviewTime(isoDate: string): string {
 
 const styles = StyleSheet.create({
   card: {
-    backgroundColor: Colors.surface,
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 12,
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    backgroundColor: Palette.surface,
+    borderRadius: Radius.md,
+    padding: Spacing.lg,
+    marginBottom: Spacing.md,
+    ...Shadow,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: Spacing.sm,
   },
   grade: {
-    fontSize: 12,
-    color: Colors.textSecondary,
-    fontWeight: '500',
+    ...Typo.small,
+    fontWeight: '600',
   },
   question: {
-    fontSize: 15,
-    color: Colors.text,
-    lineHeight: 22,
+    ...Typo.body,
     marginBottom: 10,
   },
   footer: {
@@ -79,14 +72,16 @@ const styles = StyleSheet.create({
   },
   knowledgePoint: {
     fontSize: 12,
-    color: Colors.primary,
-    backgroundColor: Colors.primary + '10',
+    color: Palette.primary,
+    backgroundColor: Palette.primaryBg,
     paddingHorizontal: 8,
-    paddingVertical: 2,
-    borderRadius: 4,
+    paddingVertical: 3,
+    borderRadius: Radius.xs,
+    overflow: 'hidden',
   },
   reviewTime: {
     fontSize: 12,
-    color: Colors.orange,
+    color: Palette.warning,
+    fontWeight: '600',
   },
 });

@@ -1,7 +1,7 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
 import { MistakeStatus } from '../models/types';
-import { StatusColors } from '../constants/colors';
+import { StatusColorMap } from '../constants/theme';
 import { STATUS_LABELS } from '../constants/mistakeReasons';
 
 interface Props {
@@ -9,7 +9,7 @@ interface Props {
 }
 
 export function StatusBadge({ status }: Props) {
-  const color = StatusColors[status] || '#9CA3AF';
+  const color = StatusColorMap[status] || '#A0A5C0';
   const label = STATUS_LABELS[status] || status;
 
   return (
@@ -37,6 +37,6 @@ const styles = StyleSheet.create({
   },
   text: {
     fontSize: 12,
-    fontWeight: '500',
+    fontWeight: '600',
   },
 });

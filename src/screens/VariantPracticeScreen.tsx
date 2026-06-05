@@ -10,7 +10,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { useMistakeStore } from '../store/mistakeStore';
-import { Colors } from '../constants/colors';
+import { Palette, Radius, Spacing, Shadow, Typo } from '../constants/theme';
 import { getVariantGenerator } from '../services';
 import { VariantQuestion } from '../models/types';
 
@@ -89,24 +89,38 @@ export function VariantPracticeScreen({ route, navigation }: { route: any; navig
     return (
       <SafeAreaView style={styles.safeArea}>
         <View style={styles.resultContainer}>
-          <Text style={styles.resultIcon}>{passed ? '🎉' : '💪'}</Text>
-          <Text style={styles.resultTitle}>
-            {passed ? '变式题通过！' : '继续加油！'}
-          </Text>
-          <Text style={styles.resultScore}>
-            {correctCount}/{variants.length} 道正确
-          </Text>
-          <Text style={styles.resultDesc}>
-            {passed
-              ? '做得很好！系统已安排下一次复习，帮你彻底掌握这个知识点。'
-              : '还需要多练习，建议重新看看解析，再试一次。'}
-          </Text>
-          <TouchableOpacity
-            style={styles.backBtn}
-            onPress={() => navigation.goBack()}
-          >
-            <Text style={styles.backBtnText}>返回</Text>
-          </TouchableOpacity>
+          <View style={styles.resultCard}>
+            <View
+              style={[
+                styles.resultIconCircle,
+                { backgroundColor: passed ? Palette.successBg : Palette.warningBg },
+              ]}
+            >
+              <Text style={styles.resultIcon}>{passed ? '🎉' : '💪'}</Text>
+            </View>
+            <Text style={styles.resultTitle}>
+              {passed ? '变式题通过！' : '继续加油！'}
+            </Text>
+            <Text
+              style={[
+                styles.resultScore,
+                { color: passed ? Palette.success : Palette.warning },
+              ]}
+            >
+              {correctCount}/{variants.length} 道正确
+            </Text>
+            <Text style={styles.resultDesc}>
+              {passed
+                ? '做得很好！系统已安排下一次复习，帮你彻底掌握这个知识点。'
+                : '还需要多练习，建议重新看看解析，再试一次。'}
+            </Text>
+            <TouchableOpacity
+              style={styles.backBtn}
+              onPress={() => navigation.goBack()}
+            >
+              <Text style={styles.backBtnText}>返回</Text>
+            </TouchableOpacity>
+          </View>
         </View>
       </SafeAreaView>
     );
@@ -144,7 +158,7 @@ export function VariantPracticeScreen({ route, navigation }: { route: any; navig
               placeholder="输入答案..."
               value={userAnswer}
               onChangeText={setUserAnswer}
-              placeholderTextColor={Colors.textLight}
+              placeholderTextColor={Palette.textMuted}
             />
             <TouchableOpacity style={styles.submitBtn} onPress={handleSubmit}>
               <Text style={styles.submitBtnText}>提交答案</Text>
@@ -155,14 +169,17 @@ export function VariantPracticeScreen({ route, navigation }: { route: any; navig
             <View
               style={[
                 styles.resultBanner,
-                { backgroundColor: isCorrect ? Colors.green + '15' : Colors.error + '15' },
+                {
+                  backgroundColor: isCorrect ? Palette.successBg : Palette.errorBg,
+                  borderColor: isCorrect ? Palette.success : Palette.error,
+                },
               ]}
             >
               <Text style={styles.resultEmoji}>{isCorrect ? '✅' : '❌'}</Text>
               <Text
                 style={[
                   styles.resultText,
-                  { color: isCorrect ? Colors.green : Colors.error },
+                  { color: isCorrect ? Palette.success : Palette.error },
                 ]}
               >
                 {isCorrect ? '回答正确！' : '回答有误'}
@@ -176,7 +193,7 @@ export function VariantPracticeScreen({ route, navigation }: { route: any; navig
               </View>
               <View style={styles.answerItem}>
                 <Text style={styles.compareLabel}>正确答案</Text>
-                <Text style={[styles.compareValue, { color: Colors.green }]}>
+                <Text style={[styles.compareValue, { color: Palette.success }]}>
                   {currentVariant.answer}
                 </Text>
               </View>
@@ -204,11 +221,11 @@ export function VariantPracticeScreen({ route, navigation }: { route: any; navig
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: Palette.bg,
   },
   container: {
     flex: 1,
-    padding: 20,
+    padding: Spacing.xl,
   },
   center: {
     flex: 1,
@@ -216,95 +233,97 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   loadingText: {
-    fontSize: 16,
-    color: Colors.textSecondary,
+    ...Typo.body,
+    color: Palette.textSecondary,
   },
   header: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 12,
+    marginBottom: Spacing.md,
   },
   headerTitle: {
-    fontSize: 20,
-    fontWeight: '700',
-    color: Colors.text,
+    ...Typo.h2,
   },
   headerProgress: {
     fontSize: 14,
-    color: Colors.primary,
-    fontWeight: '600',
+    color: Palette.primary,
+    fontWeight: '700',
   },
   progressBar: {
-    height: 4,
-    backgroundColor: Colors.grayLight,
-    borderRadius: 2,
-    marginBottom: 20,
+    height: 6,
+    backgroundColor: Palette.divider,
+    borderRadius: Radius.full,
+    marginBottom: Spacing.xl,
+    overflow: 'hidden',
   },
   progressFill: {
-    height: 4,
-    backgroundColor: Colors.primary,
-    borderRadius: 2,
+    height: 6,
+    backgroundColor: Palette.primary,
+    borderRadius: Radius.full,
   },
   questionCard: {
-    backgroundColor: Colors.surface,
-    borderRadius: 16,
-    padding: 20,
-    marginBottom: 20,
+    backgroundColor: Palette.surface,
+    borderRadius: Radius.lg,
+    padding: Spacing.xl,
+    marginBottom: Spacing.xl,
+    ...Shadow,
   },
   knowledgeTag: {
     fontSize: 12,
-    color: Colors.primary,
-    backgroundColor: Colors.primary + '10',
-    paddingHorizontal: 10,
-    paddingVertical: 3,
-    borderRadius: 10,
+    fontWeight: '600',
+    color: Palette.primary,
+    backgroundColor: Palette.primaryBg,
+    paddingHorizontal: Spacing.md,
+    paddingVertical: Spacing.xs,
+    borderRadius: Radius.full,
     alignSelf: 'flex-start',
-    marginBottom: 12,
+    marginBottom: Spacing.md,
     overflow: 'hidden',
   },
   questionText: {
     fontSize: 16,
-    color: Colors.text,
+    color: Palette.text,
     lineHeight: 26,
   },
   answerSection: {
-    gap: 12,
+    gap: Spacing.md,
   },
   answerLabel: {
+    ...Typo.label,
     fontSize: 15,
-    fontWeight: '600',
-    color: Colors.text,
   },
   answerInput: {
-    backgroundColor: Colors.surface,
-    borderRadius: 12,
+    backgroundColor: Palette.surface,
+    borderRadius: Radius.sm,
     padding: 14,
-    fontSize: 16,
-    color: Colors.text,
+    fontSize: 15,
+    color: Palette.text,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Palette.border,
   },
   submitBtn: {
-    backgroundColor: Colors.primary,
-    borderRadius: 12,
+    backgroundColor: Palette.primary,
+    borderRadius: Radius.md,
     padding: 16,
     alignItems: 'center',
+    ...Shadow,
   },
   submitBtnText: {
-    color: Colors.white,
+    color: Palette.textInverse,
     fontSize: 16,
     fontWeight: '700',
   },
   resultSection: {
-    gap: 14,
+    gap: Spacing.lg,
   },
   resultBanner: {
     flexDirection: 'row',
     alignItems: 'center',
-    padding: 16,
-    borderRadius: 12,
-    gap: 10,
+    padding: Spacing.lg,
+    borderRadius: Radius.md,
+    borderWidth: 1,
+    gap: Spacing.sm,
   },
   resultEmoji: {
     fontSize: 24,
@@ -315,90 +334,105 @@ const styles = StyleSheet.create({
   },
   answerCompare: {
     flexDirection: 'row',
-    gap: 12,
+    gap: Spacing.md,
   },
   answerItem: {
     flex: 1,
-    backgroundColor: Colors.surface,
-    padding: 12,
-    borderRadius: 10,
+    backgroundColor: Palette.surface,
+    padding: Spacing.md,
+    borderRadius: Radius.sm,
+    borderWidth: 1,
+    borderColor: Palette.border,
   },
   compareLabel: {
-    fontSize: 12,
-    color: Colors.textSecondary,
-    marginBottom: 4,
+    ...Typo.small,
+    marginBottom: Spacing.xs,
   },
   compareValue: {
     fontSize: 15,
     fontWeight: '600',
-    color: Colors.text,
+    color: Palette.text,
   },
   explanationBox: {
-    backgroundColor: Colors.surface,
-    borderRadius: 10,
+    backgroundColor: Palette.primaryBg,
+    borderRadius: Radius.sm,
     padding: 14,
     borderLeftWidth: 3,
-    borderLeftColor: Colors.primary,
+    borderLeftColor: Palette.primary,
   },
   explanationLabel: {
     fontSize: 13,
-    fontWeight: '600',
-    color: Colors.primary,
-    marginBottom: 6,
+    fontWeight: '700',
+    color: Palette.primaryDark,
+    marginBottom: Spacing.xs,
   },
   explanationText: {
     fontSize: 14,
-    color: Colors.text,
+    color: Palette.text,
     lineHeight: 22,
   },
   nextBtn: {
-    backgroundColor: Colors.primary,
-    borderRadius: 12,
+    backgroundColor: Palette.primary,
+    borderRadius: Radius.md,
     padding: 16,
     alignItems: 'center',
+    ...Shadow,
   },
   nextBtnText: {
-    color: Colors.white,
+    color: Palette.textInverse,
     fontSize: 16,
     fontWeight: '700',
   },
   resultContainer: {
     flex: 1,
     justifyContent: 'center',
+    padding: Spacing.xl,
+  },
+  resultCard: {
+    backgroundColor: Palette.surface,
+    borderRadius: Radius.lg,
+    paddingVertical: Spacing.xxxl,
+    paddingHorizontal: Spacing.xl,
     alignItems: 'center',
-    padding: 40,
+    ...Shadow,
+  },
+  resultIconCircle: {
+    width: 96,
+    height: 96,
+    borderRadius: 48,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginBottom: Spacing.xl,
   },
   resultIcon: {
-    fontSize: 64,
-    marginBottom: 20,
+    fontSize: 52,
   },
   resultTitle: {
+    ...Typo.h2,
     fontSize: 24,
-    fontWeight: '700',
-    color: Colors.text,
-    marginBottom: 8,
+    marginBottom: Spacing.sm,
   },
   resultScore: {
     fontSize: 18,
-    color: Colors.primary,
-    fontWeight: '600',
-    marginBottom: 12,
+    fontWeight: '700',
+    marginBottom: Spacing.md,
   },
   resultDesc: {
-    fontSize: 15,
-    color: Colors.textSecondary,
+    ...Typo.body,
+    color: Palette.textSecondary,
     textAlign: 'center',
-    lineHeight: 22,
-    marginBottom: 32,
+    marginBottom: Spacing.xxl,
   },
   backBtn: {
-    backgroundColor: Colors.primary,
-    borderRadius: 12,
-    paddingHorizontal: 40,
-    paddingVertical: 14,
+    backgroundColor: Palette.primary,
+    borderRadius: Radius.md,
+    paddingVertical: 16,
+    alignItems: 'center',
+    alignSelf: 'stretch',
+    ...Shadow,
   },
   backBtnText: {
-    color: Colors.white,
+    color: Palette.textInverse,
     fontSize: 16,
     fontWeight: '600',
   },

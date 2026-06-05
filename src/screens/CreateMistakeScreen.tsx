@@ -11,7 +11,7 @@ import {
   SafeAreaView,
   ActivityIndicator,
 } from 'react-native';
-import { Colors } from '../constants/colors';
+import { Palette, Radius, Spacing, Shadow, Typo } from '../constants/theme';
 import { getKnowledgePointsByGrade } from '../data/knowledgePoints';
 import { MISTAKE_REASONS } from '../constants/mistakeReasons';
 import { GRADE_LABELS } from '../constants/mistakeReasons';
@@ -106,7 +106,7 @@ export function CreateMistakeScreen({ route, navigation }: { route: any; navigat
           <Text style={styles.label}>题干</Text>
           {ocrLoading && (
             <View style={styles.ocrHint}>
-              <ActivityIndicator size="small" color={Colors.primary} />
+              <ActivityIndicator size="small" color={Palette.primary} />
               <Text style={styles.ocrHintText}>正在识别图片文字…</Text>
             </View>
           )}
@@ -117,7 +117,7 @@ export function CreateMistakeScreen({ route, navigation }: { route: any; navigat
           placeholder="请输入题目内容..."
           value={questionText}
           onChangeText={setQuestionText}
-          placeholderTextColor={Colors.textLight}
+          placeholderTextColor={Palette.textMuted}
         />
 
         <Text style={styles.label}>学生答案</Text>
@@ -126,7 +126,7 @@ export function CreateMistakeScreen({ route, navigation }: { route: any; navigat
           placeholder="孩子写的答案"
           value={studentAnswer}
           onChangeText={setStudentAnswer}
-          placeholderTextColor={Colors.textLight}
+          placeholderTextColor={Palette.textMuted}
         />
 
         <Text style={styles.label}>正确答案</Text>
@@ -135,7 +135,7 @@ export function CreateMistakeScreen({ route, navigation }: { route: any; navigat
           placeholder="正确答案"
           value={correctAnswer}
           onChangeText={setCorrectAnswer}
-          placeholderTextColor={Colors.textLight}
+          placeholderTextColor={Palette.textMuted}
         />
 
         <Text style={styles.label}>年级</Text>
@@ -220,31 +220,28 @@ export function CreateMistakeScreen({ route, navigation }: { route: any; navigat
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: Palette.bg,
   },
   container: {
     flex: 1,
-    padding: 20,
+    padding: Spacing.xl,
   },
   title: {
-    fontSize: 22,
-    fontWeight: '700',
-    color: Colors.text,
-    marginBottom: 20,
+    ...Typo.h2,
+    marginBottom: Spacing.xl,
   },
   image: {
     width: '100%',
     height: 200,
-    borderRadius: 12,
-    backgroundColor: Colors.grayLight,
-    marginBottom: 20,
+    borderRadius: Radius.md,
+    backgroundColor: Palette.divider,
+    marginBottom: Spacing.xl,
   },
   label: {
+    ...Typo.label,
     fontSize: 15,
-    fontWeight: '600',
-    color: Colors.text,
-    marginBottom: 8,
-    marginTop: 16,
+    marginBottom: Spacing.sm,
+    marginTop: Spacing.lg,
   },
   labelRow: {
     flexDirection: 'row',
@@ -254,101 +251,104 @@ const styles = StyleSheet.create({
   ocrHint: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 6,
-    marginTop: 16,
-    marginBottom: 8,
+    gap: Spacing.xs,
+    marginTop: Spacing.lg,
+    marginBottom: Spacing.sm,
   },
   ocrHintText: {
-    fontSize: 12,
-    color: Colors.primary,
+    ...Typo.small,
+    color: Palette.primary,
   },
   input: {
-    backgroundColor: Colors.surface,
-    borderRadius: 10,
+    backgroundColor: Palette.surface,
+    borderRadius: Radius.sm,
     padding: 14,
     fontSize: 15,
-    color: Colors.text,
+    color: Palette.text,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Palette.border,
   },
   textArea: {
-    backgroundColor: Colors.surface,
-    borderRadius: 10,
+    backgroundColor: Palette.surface,
+    borderRadius: Radius.sm,
     padding: 14,
     fontSize: 15,
-    color: Colors.text,
+    color: Palette.text,
     minHeight: 100,
     textAlignVertical: 'top',
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Palette.border,
   },
   chipRow: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 8,
+    gap: Spacing.sm,
   },
   chip: {
-    paddingHorizontal: 14,
-    paddingVertical: 8,
-    borderRadius: 20,
-    backgroundColor: Colors.surface,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.sm,
+    borderRadius: Radius.full,
+    backgroundColor: Palette.surface,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Palette.border,
   },
   chipActive: {
-    backgroundColor: Colors.primary,
-    borderColor: Colors.primary,
+    backgroundColor: Palette.primary,
+    borderColor: Palette.primary,
   },
   chipText: {
     fontSize: 13,
-    color: Colors.text,
+    color: Palette.text,
   },
   chipTextActive: {
-    color: Colors.white,
+    color: Palette.textInverse,
     fontWeight: '600',
   },
   reasonList: {
-    gap: 8,
+    gap: Spacing.sm,
   },
   reasonCard: {
-    backgroundColor: Colors.surface,
-    borderRadius: 10,
+    backgroundColor: Palette.surface,
+    borderRadius: Radius.md,
     padding: 14,
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Palette.border,
   },
   reasonCardActive: {
-    borderColor: Colors.primary,
-    backgroundColor: Colors.primary + '10',
+    borderColor: Palette.primary,
+    backgroundColor: Palette.primaryBg,
   },
   reasonText: {
     fontSize: 14,
-    color: Colors.text,
+    color: Palette.text,
   },
   reasonTextActive: {
-    color: Colors.primary,
+    color: Palette.primary,
     fontWeight: '600',
   },
   followUp: {
-    backgroundColor: Colors.orange + '15',
-    borderRadius: 10,
+    backgroundColor: Palette.warningBg,
+    borderRadius: Radius.md,
     padding: 14,
-    marginTop: 8,
+    marginTop: Spacing.sm,
+    borderWidth: 1,
+    borderColor: Palette.warning + '33',
   },
   followUpText: {
-    fontSize: 13,
-    color: Colors.orange,
+    ...Typo.caption,
+    color: Palette.warning,
     lineHeight: 20,
   },
   saveBtn: {
-    backgroundColor: Colors.primary,
-    borderRadius: 12,
+    backgroundColor: Palette.primary,
+    borderRadius: Radius.md,
     padding: 16,
     alignItems: 'center',
-    marginTop: 24,
+    marginTop: Spacing.xxl,
+    ...Shadow,
   },
   saveBtnText: {
-    color: Colors.white,
+    color: Palette.textInverse,
     fontSize: 16,
     fontWeight: '700',
   },

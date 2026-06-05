@@ -1,16 +1,17 @@
 import React from 'react';
 import { View, Text, StyleSheet } from 'react-native';
-import { Colors } from '../constants/colors';
+import { Palette, Spacing, Typo } from '../constants/theme';
 
 interface Props {
   title: string;
   subtitle?: string;
+  icon?: string;
 }
 
-export function EmptyState({ title, subtitle }: Props) {
+export function EmptyState({ title, subtitle, icon = '📝' }: Props) {
   return (
     <View style={styles.container}>
-      <Text style={styles.icon}>📝</Text>
+      <Text style={styles.icon}>{icon}</Text>
       <Text style={styles.title}>{title}</Text>
       {subtitle && <Text style={styles.subtitle}>{subtitle}</Text>}
     </View>
@@ -26,19 +27,18 @@ const styles = StyleSheet.create({
   },
   icon: {
     fontSize: 48,
-    marginBottom: 16,
+    marginBottom: Spacing.lg,
   },
   title: {
-    fontSize: 16,
-    color: Colors.text,
+    ...Typo.body,
+    color: Palette.text,
     textAlign: 'center',
-    lineHeight: 24,
+    fontWeight: '600',
   },
   subtitle: {
-    fontSize: 14,
-    color: Colors.textSecondary,
+    ...Typo.caption,
     textAlign: 'center',
-    marginTop: 8,
+    marginTop: Spacing.sm,
     lineHeight: 20,
   },
 });

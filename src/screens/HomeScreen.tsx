@@ -8,7 +8,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { useMistakeStore } from '../store/mistakeStore';
-import { Colors } from '../constants/colors';
+import { Palette, Radius, Spacing, Shadow, Typo } from '../constants/theme';
 import { AnalyticsService } from '../services/analytics/AnalyticsService';
 
 const analytics = new AnalyticsService();
@@ -52,6 +52,9 @@ export function HomeScreen({ navigation }: { navigation: any }) {
       ? '先讲会 1 道错题，再练 3 道变式题'
       : '每天少量高质量复习，效果最好';
 
+  const masteryColor = (mastery: number) =>
+    mastery < 40 ? Palette.error : mastery < 70 ? Palette.warning : Palette.success;
+
   return (
     <SafeAreaView style={styles.safeArea}>
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
@@ -66,7 +69,9 @@ export function HomeScreen({ navigation }: { navigation: any }) {
             style={[styles.actionBtn, styles.actionPrimary]}
             onPress={() => navigation.navigate('Capture')}
           >
-            <Text style={styles.actionIcon}>📷</Text>
+            <View style={[styles.actionIconWrap, { backgroundColor: Palette.surface }]}>
+              <Text style={styles.actionIcon}>📷</Text>
+            </View>
             <Text style={styles.actionLabel}>拍错题</Text>
           </TouchableOpacity>
 
@@ -74,7 +79,9 @@ export function HomeScreen({ navigation }: { navigation: any }) {
             style={[styles.actionBtn, styles.actionReview]}
             onPress={() => navigation.navigate('Review')}
           >
-            <Text style={styles.actionIcon}>📖</Text>
+            <View style={[styles.actionIconWrap, { backgroundColor: Palette.surface }]}>
+              <Text style={styles.actionIcon}>📖</Text>
+            </View>
             <Text style={styles.actionLabel}>今日复习</Text>
             {dueReviews.length > 0 && (
               <View style={styles.badge}>
@@ -87,7 +94,9 @@ export function HomeScreen({ navigation }: { navigation: any }) {
             style={[styles.actionBtn, styles.actionWeak]}
             onPress={() => navigation.getParent()?.navigate('薄弱点')}
           >
-            <Text style={styles.actionIcon}>📊</Text>
+            <View style={[styles.actionIconWrap, { backgroundColor: Palette.surface }]}>
+              <Text style={styles.actionIcon}>📊</Text>
+            </View>
             <Text style={styles.actionLabel}>薄弱点</Text>
           </TouchableOpacity>
 
@@ -95,7 +104,9 @@ export function HomeScreen({ navigation }: { navigation: any }) {
             style={[styles.actionBtn, styles.actionList]}
             onPress={() => navigation.getParent()?.navigate('错题')}
           >
-            <Text style={styles.actionIcon}>📚</Text>
+            <View style={[styles.actionIconWrap, { backgroundColor: Palette.surface }]}>
+              <Text style={styles.actionIcon}>📚</Text>
+            </View>
             <Text style={styles.actionLabel}>错题本</Text>
           </TouchableOpacity>
         </View>
@@ -107,19 +118,7 @@ export function HomeScreen({ navigation }: { navigation: any }) {
               <View key={wp.knowledgePointId} style={styles.weakCard}>
                 <View style={styles.weakHeader}>
                   <Text style={styles.weakName}>{wp.knowledgePointName}</Text>
-                  <Text
-                    style={[
-                      styles.weakMastery,
-                      {
-                        color:
-                          wp.mastery < 40
-                            ? Colors.error
-                            : wp.mastery < 70
-                              ? Colors.orange
-                              : Colors.green,
-                      },
-                    ]}
-                  >
+                  <Text style={[styles.weakMastery, { color: masteryColor(wp.mastery) }]}>
                     {wp.mastery}%
                   </Text>
                 </View>
@@ -129,12 +128,7 @@ export function HomeScreen({ navigation }: { navigation: any }) {
                       styles.progressFill,
                       {
                         width: `${wp.mastery}%`,
-                        backgroundColor:
-                          wp.mastery < 40
-                            ? Colors.error
-                            : wp.mastery < 70
-                              ? Colors.orange
-                              : Colors.green,
+                        backgroundColor: masteryColor(wp.mastery),
                       },
                     ]}
                   />
@@ -172,108 +166,109 @@ export function HomeScreen({ navigation }: { navigation: any }) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: Palette.bg,
   },
   container: {
     flex: 1,
-    padding: 20,
+    padding: Spacing.xl,
   },
   header: {
-    marginBottom: 24,
+    marginBottom: Spacing.xxl,
   },
   appName: {
-    fontSize: 28,
-    fontWeight: '700',
-    color: Colors.primary,
-    marginBottom: 8,
+    ...Typo.h1,
+    color: Palette.primary,
+    marginBottom: Spacing.sm,
   },
   greeting: {
-    fontSize: 18,
-    fontWeight: '600',
-    color: Colors.text,
-    marginBottom: 4,
+    ...Typo.h3,
+    marginBottom: Spacing.xs,
   },
   tip: {
-    fontSize: 14,
-    color: Colors.textSecondary,
+    ...Typo.caption,
     lineHeight: 20,
   },
   actionGrid: {
     flexDirection: 'row',
     flexWrap: 'wrap',
-    gap: 12,
-    marginBottom: 24,
+    gap: Spacing.md,
+    marginBottom: Spacing.xxl,
   },
   actionBtn: {
     width: '47%',
-    borderRadius: 16,
-    padding: 20,
+    borderRadius: Radius.lg,
+    padding: Spacing.xl,
     alignItems: 'center',
     position: 'relative',
+    ...Shadow,
   },
   actionPrimary: {
-    backgroundColor: Colors.primary + '15',
+    backgroundColor: Palette.primaryBg,
   },
   actionReview: {
-    backgroundColor: Colors.orange + '15',
+    backgroundColor: Palette.warningBg,
   },
   actionWeak: {
-    backgroundColor: Colors.secondary + '15',
+    backgroundColor: Palette.successBg,
   },
   actionList: {
-    backgroundColor: '#8B5CF6' + '15',
+    backgroundColor: Palette.accentLight,
+  },
+  actionIconWrap: {
+    width: 52,
+    height: 52,
+    borderRadius: Radius.full,
+    alignItems: 'center',
+    justifyContent: 'center',
+    marginBottom: Spacing.md,
+    ...Shadow,
   },
   actionIcon: {
-    fontSize: 32,
-    marginBottom: 8,
+    fontSize: 28,
   },
   actionLabel: {
-    fontSize: 15,
-    fontWeight: '600',
-    color: Colors.text,
+    ...Typo.label,
   },
   badge: {
     position: 'absolute',
-    top: 10,
-    right: 10,
-    backgroundColor: Colors.error,
-    borderRadius: 10,
-    minWidth: 20,
-    height: 20,
+    top: 12,
+    right: 12,
+    backgroundColor: Palette.error,
+    borderRadius: Radius.full,
+    minWidth: 22,
+    height: 22,
     alignItems: 'center',
     justifyContent: 'center',
     paddingHorizontal: 6,
   },
   badgeText: {
-    color: Colors.white,
+    color: Palette.textInverse,
     fontSize: 11,
     fontWeight: '700',
   },
   section: {
-    marginBottom: 20,
+    marginBottom: Spacing.xl,
   },
   sectionTitle: {
-    fontSize: 17,
-    fontWeight: '600',
-    color: Colors.text,
-    marginBottom: 12,
+    ...Typo.label,
+    color: Palette.textSecondary,
+    marginBottom: Spacing.md,
   },
   weakCard: {
-    backgroundColor: Colors.surface,
-    borderRadius: 12,
-    padding: 14,
-    marginBottom: 10,
+    backgroundColor: Palette.surface,
+    borderRadius: Radius.md,
+    padding: Spacing.lg,
+    marginBottom: Spacing.sm,
+    ...Shadow,
   },
   weakHeader: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    marginBottom: 8,
+    marginBottom: Spacing.sm,
   },
   weakName: {
-    fontSize: 14,
-    fontWeight: '600',
-    color: Colors.text,
+    ...Typo.label,
   },
   weakMastery: {
     fontSize: 14,
@@ -281,31 +276,31 @@ const styles = StyleSheet.create({
   },
   progressBar: {
     height: 6,
-    backgroundColor: Colors.grayLight,
-    borderRadius: 3,
-    marginBottom: 6,
+    backgroundColor: Palette.divider,
+    borderRadius: Radius.xs,
+    marginBottom: Spacing.sm,
+    overflow: 'hidden',
   },
   progressFill: {
     height: 6,
-    borderRadius: 3,
+    borderRadius: Radius.xs,
   },
   weakReason: {
-    fontSize: 12,
-    color: Colors.textSecondary,
+    ...Typo.small,
   },
   reviewItem: {
-    backgroundColor: Colors.surface,
-    borderRadius: 10,
-    padding: 14,
-    marginBottom: 8,
+    backgroundColor: Palette.surface,
+    borderRadius: Radius.md,
+    padding: Spacing.lg,
+    marginBottom: Spacing.sm,
+    ...Shadow,
   },
   reviewQuestion: {
-    fontSize: 14,
-    color: Colors.text,
-    marginBottom: 4,
+    ...Typo.body,
+    marginBottom: Spacing.xs,
   },
   reviewKp: {
-    fontSize: 12,
-    color: Colors.primary,
+    ...Typo.small,
+    color: Palette.primary,
   },
 });

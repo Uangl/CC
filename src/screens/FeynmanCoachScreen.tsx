@@ -12,7 +12,7 @@ import {
   ActivityIndicator,
 } from 'react-native';
 import { useMistakeStore } from '../store/mistakeStore';
-import { Colors } from '../constants/colors';
+import { Palette, Radius, Spacing, Shadow, ShadowLight, Typo } from '../constants/theme';
 import { getAiTutorService } from '../services';
 
 const aiService = getAiTutorService();
@@ -164,11 +164,27 @@ export function FeynmanCoachScreen({ route, navigation }: { route: any; navigati
         keyboardVerticalOffset={90}
       >
         <View style={styles.headerBar}>
-          <Text style={styles.headerTitle}>费曼讲题</Text>
-          <Text style={styles.headerProgress}>
-            {Math.min(currentQuestion + 1, FEYNMAN_QUESTIONS.length)}/
-            {FEYNMAN_QUESTIONS.length}
-          </Text>
+          <View style={styles.headerRow}>
+            <Text style={styles.headerTitle}>费曼讲题</Text>
+            <Text style={styles.headerProgress}>
+              {Math.min(currentQuestion + 1, FEYNMAN_QUESTIONS.length)}/
+              {FEYNMAN_QUESTIONS.length}
+            </Text>
+          </View>
+          <View style={styles.progressTrack}>
+            <View
+              style={[
+                styles.progressFill,
+                {
+                  width: `${
+                    (Math.min(currentQuestion + 1, FEYNMAN_QUESTIONS.length) /
+                      FEYNMAN_QUESTIONS.length) *
+                    100
+                  }%`,
+                },
+              ]}
+            />
+          </View>
         </View>
 
         <ScrollView
@@ -178,30 +194,34 @@ export function FeynmanCoachScreen({ route, navigation }: { route: any; navigati
           showsVerticalScrollIndicator={false}
           onContentSizeChange={() => scrollToBottom()}
         >
-          {messages.map((msg, idx) => (
-            <View
-              key={idx}
-              style={[
-                styles.bubble,
-                msg.role === 'ai' ? styles.aiBubble : styles.studentBubble,
-              ]}
-            >
-              <Text
-                style={[
-                  styles.bubbleText,
-                  msg.role === 'student' && styles.studentText,
-                ]}
-              >
-                {msg.role === 'ai' ? '🤖 ' : ''}
-                {msg.text}
-              </Text>
-            </View>
-          ))}
+          {messages.map((msg, idx) =>
+            msg.role === 'ai' ? (
+              <View key={idx} style={styles.aiRow}>
+                <View style={styles.avatar}>
+                  <Text style={styles.avatarEmoji}>🤖</Text>
+                </View>
+                <View style={[styles.bubble, styles.aiBubble]}>
+                  <Text style={styles.bubbleText}>{msg.text}</Text>
+                </View>
+              </View>
+            ) : (
+              <View key={idx} style={[styles.bubble, styles.studentBubble]}>
+                <Text style={[styles.bubbleText, styles.studentText]}>
+                  {msg.text}
+                </Text>
+              </View>
+            )
+          )}
 
           {busy && (
-            <View style={[styles.bubble, styles.aiBubble, styles.typingBubble]}>
-              <ActivityIndicator size="small" color={Colors.primary} />
-              <Text style={styles.typingText}>AI小同学正在思考…</Text>
+            <View style={styles.aiRow}>
+              <View style={styles.avatar}>
+                <Text style={styles.avatarEmoji}>🤖</Text>
+              </View>
+              <View style={[styles.bubble, styles.aiBubble, styles.typingBubble]}>
+                <ActivityIndicator size="small" color={Palette.primary} />
+                <Text style={styles.typingText}>AI小同学正在思考…</Text>
+              </View>
             </View>
           )}
 
@@ -227,7 +247,7 @@ export function FeynmanCoachScreen({ route, navigation }: { route: any; navigati
               multiline
               maxLength={500}
               editable={!busy}
-              placeholderTextColor={Colors.textLight}
+              placeholderTextColor={Palette.textMuted}
             />
             <TouchableOpacity
               style={[
@@ -249,7 +269,7 @@ export function FeynmanCoachScreen({ route, navigation }: { route: any; navigati
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: Palette.bg,
   },
   flex: {
     flex: 1,
@@ -260,122 +280,160 @@ const styles = StyleSheet.create({
     alignItems: 'center',
   },
   headerBar: {
+    paddingHorizontal: Spacing.xl,
+    paddingTop: Spacing.lg,
+    paddingBottom: Spacing.md,
+    backgroundColor: Palette.surface,
+    borderBottomWidth: 1,
+    borderBottomColor: Palette.divider,
+  },
+  headerRow: {
     flexDirection: 'row',
     justifyContent: 'space-between',
     alignItems: 'center',
-    padding: 16,
-    backgroundColor: Colors.surface,
-    borderBottomWidth: 1,
-    borderBottomColor: Colors.border,
+    marginBottom: Spacing.md,
   },
   headerTitle: {
-    fontSize: 17,
-    fontWeight: '600',
-    color: Colors.text,
+    ...Typo.h3,
   },
   headerProgress: {
     fontSize: 14,
-    color: Colors.primary,
-    fontWeight: '600',
+    color: Palette.primary,
+    fontWeight: '700',
+  },
+  progressTrack: {
+    height: 6,
+    backgroundColor: Palette.divider,
+    borderRadius: Radius.full,
+    overflow: 'hidden',
+  },
+  progressFill: {
+    height: 6,
+    backgroundColor: Palette.primary,
+    borderRadius: Radius.full,
   },
   chatArea: {
     flex: 1,
   },
   chatContent: {
-    padding: 16,
-    paddingBottom: 20,
+    padding: Spacing.lg,
+    paddingBottom: Spacing.xl,
+  },
+  aiRow: {
+    flexDirection: 'row',
+    alignItems: 'flex-end',
+    alignSelf: 'flex-start',
+    maxWidth: '90%',
+    marginBottom: Spacing.md,
+    gap: Spacing.sm,
+  },
+  avatar: {
+    width: 34,
+    height: 34,
+    borderRadius: 17,
+    backgroundColor: Palette.primaryBg,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  avatarEmoji: {
+    fontSize: 18,
   },
   bubble: {
-    maxWidth: '85%',
-    padding: 14,
-    borderRadius: 16,
-    marginBottom: 10,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
+    borderRadius: Radius.lg,
+    ...ShadowLight,
   },
   aiBubble: {
-    backgroundColor: Colors.surface,
-    alignSelf: 'flex-start',
-    borderBottomLeftRadius: 4,
+    flexShrink: 1,
+    backgroundColor: Palette.surface,
+    borderBottomLeftRadius: Radius.xs,
   },
   studentBubble: {
-    backgroundColor: Colors.primary,
+    maxWidth: '85%',
+    backgroundColor: Palette.primary,
     alignSelf: 'flex-end',
-    borderBottomRightRadius: 4,
+    borderBottomRightRadius: Radius.xs,
+    marginBottom: Spacing.md,
   },
   bubbleText: {
-    fontSize: 15,
-    color: Colors.text,
-    lineHeight: 22,
+    ...Typo.body,
   },
   studentText: {
-    color: Colors.white,
+    color: Palette.textInverse,
   },
   typingBubble: {
     flexDirection: 'row',
     alignItems: 'center',
-    gap: 8,
+    gap: Spacing.sm,
   },
   typingText: {
-    fontSize: 14,
-    color: Colors.textSecondary,
+    ...Typo.caption,
   },
   inputBar: {
     flexDirection: 'row',
     alignItems: 'flex-end',
-    padding: 12,
-    backgroundColor: Colors.surface,
+    padding: Spacing.md,
+    backgroundColor: Palette.surface,
     borderTopWidth: 1,
-    borderTopColor: Colors.border,
-    gap: 10,
+    borderTopColor: Palette.divider,
+    gap: Spacing.sm,
   },
   textInput: {
     flex: 1,
-    backgroundColor: Colors.grayLight,
-    borderRadius: 20,
-    paddingHorizontal: 16,
-    paddingVertical: 10,
+    backgroundColor: Palette.bg,
+    borderRadius: Radius.lg,
+    paddingHorizontal: Spacing.lg,
+    paddingVertical: Spacing.md,
     fontSize: 15,
-    color: Colors.text,
+    color: Palette.text,
+    borderWidth: 1,
+    borderColor: Palette.border,
     maxHeight: 100,
   },
   sendBtn: {
-    backgroundColor: Colors.primary,
-    borderRadius: 20,
-    paddingHorizontal: 18,
-    paddingVertical: 10,
+    backgroundColor: Palette.primary,
+    borderRadius: Radius.lg,
+    paddingHorizontal: Spacing.xl,
+    paddingVertical: Spacing.md,
+    justifyContent: 'center',
+    ...ShadowLight,
   },
   sendBtnDisabled: {
     opacity: 0.5,
   },
   sendBtnText: {
-    color: Colors.white,
+    color: Palette.textInverse,
     fontSize: 15,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   completedActions: {
-    gap: 10,
-    marginTop: 16,
+    gap: Spacing.sm,
+    marginTop: Spacing.lg,
   },
   variantBtn: {
-    backgroundColor: Colors.primary,
-    borderRadius: 12,
-    padding: 14,
+    backgroundColor: Palette.primary,
+    borderRadius: Radius.md,
+    padding: 16,
     alignItems: 'center',
+    ...Shadow,
   },
   variantBtnText: {
-    color: Colors.white,
-    fontSize: 15,
-    fontWeight: '600',
+    color: Palette.textInverse,
+    fontSize: 16,
+    fontWeight: '700',
   },
   finishBtn: {
-    backgroundColor: Colors.surface,
-    borderRadius: 12,
-    padding: 14,
+    backgroundColor: Palette.surface,
+    borderRadius: Radius.md,
+    padding: 16,
     alignItems: 'center',
     borderWidth: 1,
-    borderColor: Colors.border,
+    borderColor: Palette.border,
   },
   finishBtnText: {
-    color: Colors.textSecondary,
+    color: Palette.textSecondary,
     fontSize: 15,
+    fontWeight: '600',
   },
 });

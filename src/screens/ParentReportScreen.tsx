@@ -7,7 +7,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { useMistakeStore } from '../store/mistakeStore';
-import { Colors } from '../constants/colors';
+import { Palette, Radius, Spacing, Shadow, Typo } from '../constants/theme';
 import { AnalyticsService } from '../services/analytics/AnalyticsService';
 import { EmptyState } from '../components/EmptyState';
 
@@ -19,7 +19,7 @@ export function ParentReportScreen() {
 
   if (mistakes.length === 0) {
     return (
-      <SafeAreaView style={styles.safeArea}>
+      <SafeAreaView style={styles.safe}>
         <EmptyState
           title="暂无数据"
           subtitle="录入错题后，系统会自动生成家长周报。"
@@ -29,15 +29,15 @@ export function ParentReportScreen() {
   }
 
   const getMasteryColor = (mastery: number) => {
-    if (mastery < 40) return Colors.error;
-    if (mastery < 70) return Colors.orange;
-    return Colors.green;
+    if (mastery < 40) return Palette.error;
+    if (mastery < 70) return Palette.warning;
+    return Palette.success;
   };
 
   return (
-    <SafeAreaView style={styles.safeArea}>
+    <SafeAreaView style={styles.safe}>
       <ScrollView style={styles.container} showsVerticalScrollIndicator={false}>
-        <Text style={styles.title}>家长周报</Text>
+        <Text style={Typo.h2}>家长周报</Text>
         <Text style={styles.subtitle}>
           {formatDateRange(report.weekStart, report.weekEnd)}
         </Text>
@@ -48,7 +48,7 @@ export function ParentReportScreen() {
             <Text style={styles.summaryLabel}>本周新增错题</Text>
           </View>
           <View style={styles.summaryCard}>
-            <Text style={[styles.summaryValue, { color: Colors.green }]}>
+            <Text style={[styles.summaryValue, { color: Palette.success }]}>
               {report.masteredCount}
             </Text>
             <Text style={styles.summaryLabel}>本周已出库</Text>
@@ -58,41 +58,51 @@ export function ParentReportScreen() {
         {report.topWeakPoints.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>薄弱知识点 Top {report.topWeakPoints.length}</Text>
-            {report.topWeakPoints.map((wp) => (
-              <View key={wp.knowledgePointId} style={styles.weakItem}>
-                <View style={styles.weakInfo}>
-                  <Text style={styles.weakName}>{wp.knowledgePointName}</Text>
-                  <Text style={styles.weakDetail}>
-                    错题 {wp.totalMistakes} 道 · {wp.mainReasonLabel}
+            <View style={styles.card}>
+              {report.topWeakPoints.map((wp, idx) => (
+                <View
+                  key={wp.knowledgePointId}
+                  style={[
+                    styles.weakItem,
+                    idx === report.topWeakPoints.length - 1 && styles.weakItemLast,
+                  ]}
+                >
+                  <View style={styles.weakInfo}>
+                    <Text style={styles.weakName}>{wp.knowledgePointName}</Text>
+                    <Text style={styles.weakDetail}>
+                      错题 {wp.totalMistakes} 道 · {wp.mainReasonLabel}
+                    </Text>
+                  </View>
+                  <Text
+                    style={[styles.weakMastery, { color: getMasteryColor(wp.mastery) }]}
+                  >
+                    {wp.mastery}%
                   </Text>
                 </View>
-                <Text
-                  style={[styles.weakMastery, { color: getMasteryColor(wp.mastery) }]}
-                >
-                  {wp.mastery}%
-                </Text>
-              </View>
-            ))}
+              ))}
+            </View>
           </View>
         )}
 
         {report.reasonDistribution.length > 0 && (
           <View style={styles.section}>
             <Text style={styles.sectionTitle}>错因分布</Text>
-            {report.reasonDistribution.map((item) => (
-              <View key={item.reason} style={styles.reasonRow}>
-                <Text style={styles.reasonLabel}>{item.label}</Text>
-                <View style={styles.reasonBarContainer}>
-                  <View
-                    style={[
-                      styles.reasonBar,
-                      { width: `${item.percentage}%` },
-                    ]}
-                  />
+            <View style={styles.card}>
+              {report.reasonDistribution.map((item) => (
+                <View key={item.reason} style={styles.reasonRow}>
+                  <Text style={styles.reasonLabel}>{item.label}</Text>
+                  <View style={styles.reasonBarContainer}>
+                    <View
+                      style={[
+                        styles.reasonBar,
+                        { width: `${item.percentage}%` },
+                      ]}
+                    />
+                  </View>
+                  <Text style={styles.reasonPercent}>{item.percentage}%</Text>
                 </View>
-                <Text style={styles.reasonPercent}>{item.percentage}%</Text>
-              </View>
-            ))}
+              ))}
+            </View>
           </View>
         )}
 
@@ -118,81 +128,76 @@ function formatDateRange(start: string, end: string): string {
 }
 
 const styles = StyleSheet.create({
-  safeArea: {
+  safe: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: Palette.bg,
   },
   container: {
     flex: 1,
-    padding: 20,
-  },
-  title: {
-    fontSize: 24,
-    fontWeight: '700',
-    color: Colors.text,
-    marginBottom: 4,
+    padding: Spacing.xl,
   },
   subtitle: {
-    fontSize: 14,
-    color: Colors.textSecondary,
-    marginBottom: 20,
+    ...Typo.caption,
+    marginTop: Spacing.xs,
+    marginBottom: Spacing.xl,
   },
   summaryRow: {
     flexDirection: 'row',
-    gap: 12,
-    marginBottom: 24,
+    gap: Spacing.md,
+    marginBottom: Spacing.xxl,
   },
   summaryCard: {
     flex: 1,
-    backgroundColor: Colors.surface,
-    borderRadius: 16,
-    padding: 20,
+    backgroundColor: Palette.surface,
+    borderRadius: Radius.lg,
+    padding: Spacing.xl,
     alignItems: 'center',
-    shadowColor: '#000',
-    shadowOffset: { width: 0, height: 1 },
-    shadowOpacity: 0.05,
-    shadowRadius: 4,
-    elevation: 2,
+    ...Shadow,
   },
   summaryValue: {
-    fontSize: 32,
-    fontWeight: '700',
-    color: Colors.primary,
-    marginBottom: 4,
+    ...Typo.h1,
+    color: Palette.primary,
+    marginBottom: Spacing.xs,
   },
   summaryLabel: {
-    fontSize: 13,
-    color: Colors.textSecondary,
+    ...Typo.caption,
   },
   section: {
-    marginBottom: 24,
+    marginBottom: Spacing.xxl,
   },
   sectionTitle: {
-    fontSize: 17,
-    fontWeight: '600',
-    color: Colors.text,
-    marginBottom: 12,
+    ...Typo.label,
+    color: Palette.textSecondary,
+    marginBottom: Spacing.sm,
+  },
+  card: {
+    backgroundColor: Palette.surface,
+    borderRadius: Radius.md,
+    padding: Spacing.lg,
+    ...Shadow,
   },
   weakItem: {
     flexDirection: 'row',
     alignItems: 'center',
-    backgroundColor: Colors.surface,
-    borderRadius: 10,
-    padding: 14,
-    marginBottom: 8,
+    paddingVertical: Spacing.md,
+    borderBottomWidth: 1,
+    borderBottomColor: Palette.divider,
+  },
+  weakItemLast: {
+    borderBottomWidth: 0,
+    paddingBottom: 0,
   },
   weakInfo: {
     flex: 1,
+    marginRight: Spacing.md,
   },
   weakName: {
-    fontSize: 14,
+    ...Typo.body,
     fontWeight: '600',
-    color: Colors.text,
     marginBottom: 2,
   },
   weakDetail: {
-    fontSize: 12,
-    color: Colors.textSecondary,
+    ...Typo.small,
   },
   weakMastery: {
     fontSize: 16,
@@ -201,42 +206,42 @@ const styles = StyleSheet.create({
   reasonRow: {
     flexDirection: 'row',
     alignItems: 'center',
-    marginBottom: 10,
-    gap: 8,
+    marginBottom: Spacing.md,
+    gap: Spacing.sm,
   },
   reasonLabel: {
     width: 100,
-    fontSize: 13,
-    color: Colors.text,
+    ...Typo.caption,
+    color: Palette.text,
   },
   reasonBarContainer: {
     flex: 1,
     height: 8,
-    backgroundColor: Colors.grayLight,
-    borderRadius: 4,
+    backgroundColor: Palette.divider,
+    borderRadius: Radius.full,
+    overflow: 'hidden',
   },
   reasonBar: {
     height: 8,
-    backgroundColor: Colors.primary,
-    borderRadius: 4,
+    backgroundColor: Palette.primary,
+    borderRadius: Radius.full,
   },
   reasonPercent: {
     width: 36,
-    fontSize: 13,
-    color: Colors.textSecondary,
+    ...Typo.caption,
     textAlign: 'right',
   },
   suggestionCard: {
-    backgroundColor: Colors.primary + '08',
-    borderRadius: 12,
-    padding: 16,
-    marginBottom: 10,
+    backgroundColor: Palette.primaryBg,
+    borderRadius: Radius.md,
+    padding: Spacing.lg,
+    marginBottom: Spacing.sm,
     borderLeftWidth: 3,
-    borderLeftColor: Colors.primary,
+    borderLeftColor: Palette.primary,
   },
   suggestionText: {
-    fontSize: 14,
-    color: Colors.text,
+    ...Typo.body,
+    color: Palette.primaryDark,
     lineHeight: 22,
   },
 });

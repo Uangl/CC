@@ -8,7 +8,7 @@ import {
   SafeAreaView,
 } from 'react-native';
 import { useMistakeStore } from '../store/mistakeStore';
-import { Colors } from '../constants/colors';
+import { Palette, Radius, Spacing, ShadowLight, Typo } from '../constants/theme';
 import { MistakeCardPreview } from '../components/MistakeCardPreview';
 import { EmptyState } from '../components/EmptyState';
 import { ReviewScheduler } from '../services/review/ReviewScheduler';
@@ -104,60 +104,67 @@ export function ReviewScreen({ navigation }: { navigation: any }) {
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: Colors.background,
+    backgroundColor: Palette.bg,
   },
   container: {
     flex: 1,
-    padding: 20,
+    padding: Spacing.xl,
   },
   title: {
+    ...Typo.h2,
     fontSize: 24,
-    fontWeight: '700',
-    color: Colors.text,
-    marginBottom: 16,
+    marginBottom: Spacing.lg,
   },
   statsBar: {
-    backgroundColor: Colors.orange + '15',
-    borderRadius: 10,
-    padding: 12,
-    marginBottom: 16,
+    backgroundColor: Palette.warningBg,
+    borderRadius: Radius.md,
+    padding: Spacing.md,
+    marginBottom: Spacing.lg,
+    borderWidth: 1,
+    borderColor: Palette.warning + '33',
   },
   statsText: {
     fontSize: 14,
-    color: Colors.orange,
+    color: Palette.warning,
     fontWeight: '600',
     textAlign: 'center',
   },
   reviewActions: {
     flexDirection: 'row',
-    gap: 10,
-    marginTop: -4,
-    marginBottom: 12,
-    paddingHorizontal: 4,
+    gap: Spacing.sm,
+    marginTop: -Spacing.xs,
+    marginBottom: Spacing.md,
+    paddingHorizontal: Spacing.xs,
   },
   passBtn: {
     flex: 1,
-    backgroundColor: Colors.green + '15',
-    borderRadius: 8,
-    padding: 10,
+    backgroundColor: Palette.successBg,
+    borderRadius: Radius.sm,
+    padding: Spacing.md,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Palette.success + '33',
+    ...ShadowLight,
   },
   passBtnText: {
-    color: Colors.green,
+    color: Palette.success,
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   failBtn: {
     flex: 1,
-    backgroundColor: Colors.orange + '15',
-    borderRadius: 8,
-    padding: 10,
+    backgroundColor: Palette.warningBg,
+    borderRadius: Radius.sm,
+    padding: Spacing.md,
     alignItems: 'center',
+    borderWidth: 1,
+    borderColor: Palette.warning + '33',
+    ...ShadowLight,
   },
   failBtnText: {
-    color: Colors.orange,
+    color: Palette.warning,
     fontSize: 13,
-    fontWeight: '600',
+    fontWeight: '700',
   },
   emptyList: {
     flex: 1,
