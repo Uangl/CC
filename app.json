@@ -6,7 +6,7 @@
     "orientation": "portrait",
     "icon": "./assets/icon.png",
     "userInterfaceStyle": "light",
-    "newArchEnabled": true,
+    "newArchEnabled": false,
     "splash": {
       "image": "./assets/splash.png",
       "resizeMode": "contain",
@@ -21,7 +21,7 @@
       }
     },
     "android": {
-      "package": "com.cuoti.xiaolaoshi",
+      "package": "com.qwopop.cuotixiaolaoshi",
       "versionCode": 1,
       "adaptiveIcon": {
         "foregroundImage": "./assets/adaptive-icon.png",
@@ -45,7 +45,7 @@
     ],
     "extra": {
       "eas": {
-        "projectId": ""
+        "projectId": "99cc493e-c7eb-4483-92d3-8bc52ab5dde5"
       }
     }
   }
